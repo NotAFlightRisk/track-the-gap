@@ -287,6 +287,55 @@ describe('quantileStatus', () => {
     expect(quantileStatus(line(Array<HealthStatus>(6).fill('bunching'), 62))).toBe('no-data');
   });
 
+  it('will not call a line bunched off sections that are gapping', () => {
+    const sections = [
+      ...Array<HealthStatus>(18).fill('gap'),
+      ...Array<HealthStatus>(6).fill('bunching'),
+      ...Array<HealthStatus>(2).fill('degraded'),
+      ...Array<HealthStatus>(47).fill('normal')
+    ];
+    expect(quantileStatus(sections)).toBe('degraded');
+  });
+
+  it('still calls a line bunched when bunching alone reaches the quarter', () => {
+    const sections = [
+      ...Array<HealthStatus>(30).fill('bunching'),
+      ...Array<HealthStatus>(70).fill('normal')
+    ];
+    expect(quantileStatus(sections)).toBe('bunching');
+  });
+
+  it('lets gaps outrank bunching when both reach the quarter', () => {
+    const sections = [
+      ...Array<HealthStatus>(40).fill('gap'),
+      ...Array<HealthStatus>(40).fill('bunching'),
+      ...Array<HealthStatus>(20).fill('normal')
+    ];
+    expect(quantileStatus(sections)).toBe('gap');
+  });
+
+  it('needs more than a quarter of the sections before it calls the whole set bunched', () => {
+    const bunched = (n: number): HealthStatus[] => [
+      ...Array<HealthStatus>(n).fill('bunching'),
+      ...Array<HealthStatus>(100 - n).fill('normal')
+    ];
+    expect(quantileStatus(bunched(25))).toBe('normal');
+    expect(quantileStatus(bunched(26))).toBe('bunching');
+  });
+
+  it('still pools sections that are all stretching in the same direction', () => {
+    const sections = [
+      ...Array<HealthStatus>(6).fill('gap'),
+      ...Array<HealthStatus>(10).fill('degraded'),
+      ...Array<HealthStatus>(44).fill('normal')
+    ];
+    expect(quantileStatus(sections)).toBe('degraded');
+  });
+
+  it('reads a mix where neither condition reaches the quarter as even service', () => {
+    expect(quantileStatus(['gap', 'bunching', 'normal', 'normal'])).toBe('normal');
+  });
+
   it('still judges a two section line that is fully measured', () => {
     expect(quantileStatus(['bunching', 'normal'])).toBe('bunching');
   });

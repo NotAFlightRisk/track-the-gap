@@ -92,16 +92,22 @@ export const isMeasurable = (statuses: HealthStatus[], config: HealthConfig = HE
   statuses.filter((status) => status !== 'no-data').length >=
   Math.max(1, statuses.length * config.minCoverage);
 
+/** Bunching is the opposite condition to a gap, not a milder one, so it sits off the same scale. */
+const stretchOf = (status: HealthStatus): HealthStatus =>
+  status === 'bunching' ? 'normal' : status;
+
 /** The level the unhappiest slice reaches, once enough of the set is measurable to have a view. */
 export function quantileStatus(
   statuses: HealthStatus[],
   config: HealthConfig = HEALTH
 ): HealthStatus {
   if (!isMeasurable(statuses, config)) return 'no-data';
-  const ranked = statuses
-    .filter((status) => status !== 'no-data')
-    .sort((a, b) => STATUS_RANK[b] - STATUS_RANK[a]);
-  return ranked[Math.min(ranked.length - 1, Math.floor(config.severityQuantile * ranked.length))];
+  const judged = statuses.filter((status) => status !== 'no-data');
+  const slice = Math.floor(config.severityQuantile * judged.length);
+  const ranked = judged.map(stretchOf).sort((a, b) => STATUS_RANK[b] - STATUS_RANK[a]);
+  const stretched = ranked[Math.min(ranked.length - 1, slice)];
+  const bunched = judged.filter((status) => status === 'bunching').length > slice;
+  return bunched && STATUS_RANK.bunching > STATUS_RANK[stretched] ? 'bunching' : stretched;
 }
 
 export interface StatusMeta {
