@@ -1,6 +1,14 @@
 import { byUnhappiness, quantileStatus, type HealthStatus } from '$lib/config/health';
 import { LINES, lineById } from '$lib/config/lines';
-import { arrivalsOn, expectedAt, londonClock, measure, EMPTY } from '$lib/engine/headway';
+import {
+  arrivalsOn,
+  expectedAt,
+  gapIn,
+  londonClock,
+  measure,
+  worstGapOf,
+  EMPTY
+} from '$lib/engine/headway';
 import { buildTrains, type Train } from '$lib/engine/trains';
 import type { DirectionModel, Segment } from '$lib/network/types';
 import type {
@@ -115,21 +123,24 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
   const towards = directionLabel(model);
 
   const counts = emptyCounts();
-  let worstGap: Gap | null = null;
-  for (const segment of segments) {
-    counts[segment.headway.status]++;
-    const worst = segment.headway.worst;
-    if (worst && (!worstGap || worst > worstGap.seconds)) {
-      worstGap = {
-        seconds: worst,
-        ratio: segment.headway.worstRatio,
-        from: segment.fromName,
-        to: segment.toName,
-        direction: model.direction,
-        towards
-      };
-    }
-  }
+  for (const segment of segments) counts[segment.headway.status]++;
+
+  const worstGap = worstGapOf(
+    segments
+      .map((segment) => {
+        const gap = gapIn(segment.headway);
+        return (
+          gap && {
+            ...gap,
+            from: segment.fromName,
+            to: segment.toName,
+            direction: model.direction,
+            towards
+          }
+        );
+      })
+      .filter((g): g is Gap => g !== null)
+  );
 
   const judged = segments.filter((s) => s.headway.observed !== null);
   const observed = median(judged.map((s) => s.headway.observed!));
@@ -194,11 +205,9 @@ function buildLine(
     }
   }
 
-  const worstGap =
-    directions
-      .map((d) => d.worstGap)
-      .filter((g): g is Gap => g !== null)
-      .sort((a, b) => b.seconds - a.seconds)[0] ?? null;
+  const worstGap = worstGapOf(
+    directions.map((d) => d.worstGap).filter((g): g is Gap => g !== null)
+  );
 
   const observed = median(
     directions.map((d) => d.headway.observed).filter((v): v is number => v !== null)

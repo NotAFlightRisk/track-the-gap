@@ -1,4 +1,4 @@
-import { classify, HEALTH, type HealthConfig, type HealthStatus } from '$lib/config/health';
+import { classify, HEALTH, isGap, type HealthConfig, type HealthStatus } from '$lib/config/health';
 import type { DayType, DirectionModel, Segment } from '$lib/network/types';
 import type { Train } from './trains';
 
@@ -25,6 +25,21 @@ export const EMPTY: Headway = {
   samples: 0,
   status: 'no-data'
 };
+
+export interface Gapped {
+  seconds: number;
+  ratio: number;
+}
+
+/** The gap a section owns, if the classifier already called its headway one. */
+export const gapIn = ({ status, worst, worstRatio }: Headway): Gapped | null =>
+  isGap(status) && worst !== null && worstRatio !== null
+    ? { seconds: worst, ratio: worstRatio }
+    : null;
+
+/** The worst of a set of gaps: furthest past its own timetable, never longest in seconds. */
+export const worstGapOf = <T extends Gapped>(gaps: T[]): T | null =>
+  gaps.reduce<T | null>((worst, gap) => (!worst || gap.ratio > worst.ratio ? gap : worst), null);
 
 const median = (values: number[]): number => {
   const sorted = [...values].sort((a, b) => a - b);
