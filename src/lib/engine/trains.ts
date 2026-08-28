@@ -80,10 +80,13 @@ function matchDirection(
 
   // One prediction left tells us nothing about order, so trust TfL's own direction.
   const serving = models.filter((model) => model.layout[calls[0].stop]);
-  return (
-    serving.find((model) => model.direction === hinted) ??
-    (serving.length === 1 ? serving[0] : null)
-  );
+  const hint = serving.find((model) => model.direction === hinted);
+  if (hint) return hint;
+
+  // Failing that, take a direction only when it is the one that can actually reach the stop.
+  const arriving = serving.filter((model) => model.segments.some((s) => s.to === calls[0].stop));
+  const candidates = arriving.length ? arriving : serving;
+  return candidates.length === 1 ? candidates[0] : null;
 }
 
 /** TfL writes "Between Foo and Bar", "At Foo" or "Approaching Foo". */
