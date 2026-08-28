@@ -167,12 +167,79 @@ describe('trains TfL will not identify', () => {
     const trains = buildTrains(
       [
         anon({ naptanId: 'C', timeToStation: 60, destinationNaptanId: 'C' }),
-        anon({ naptanId: 'C', timeToStation: 300, destinationNaptanId: 'C' })
+        anon({
+          naptanId: 'C',
+          timeToStation: 300,
+          destinationNaptanId: 'C',
+          currentLocation: 'At Alpha Platform 1'
+        })
       ],
       [inbound],
       { stationName }
     );
     expect(trains).toHaveLength(2);
+  });
+
+  it('reads predictions reporting one train in one place as one train', () => {
+    const where = 'At Alpha Platform 1';
+    const trains = buildTrains(
+      [
+        anon({
+          naptanId: 'B',
+          timeToStation: 60,
+          destinationNaptanId: 'C',
+          currentLocation: where
+        }),
+        anon({
+          naptanId: 'C',
+          timeToStation: 400,
+          destinationNaptanId: 'C',
+          currentLocation: where
+        })
+      ],
+      [inbound],
+      { stationName }
+    );
+    expect(trains).toHaveLength(1);
+    expect(trains[0].calls.map((c) => c.stop)).toEqual(['B', 'C']);
+  });
+
+  it('keeps a train predicted at the terminus it is running to', () => {
+    const trains = buildTrains(
+      [
+        anon({ naptanId: 'B', timeToStation: 60, destinationNaptanId: 'C', direction: undefined }),
+        anon({ naptanId: 'C', timeToStation: 180, destinationNaptanId: 'C', direction: undefined }),
+        anon({
+          naptanId: 'C',
+          timeToStation: 240,
+          destinationNaptanId: 'C',
+          direction: undefined,
+          platformName: 'Northbound - Platform 2'
+        })
+      ],
+      models,
+      { stationName }
+    );
+    expect(trains).toHaveLength(1);
+    expect(trains[0].calls.map((c) => c.stop)).toEqual(['B', 'C']);
+  });
+
+  it('places a train predicted only at its terminus', () => {
+    const trains = buildTrains(
+      [anon({ naptanId: 'C', timeToStation: 180, destinationNaptanId: 'C', direction: undefined })],
+      models,
+      { stationName }
+    );
+    expect(trains.map((t) => t.direction)).toEqual(['inbound']);
+  });
+
+  it('leaves a terminating train alone where both directions reach the stop', () => {
+    const trains = buildTrains(
+      [anon({ naptanId: 'B', timeToStation: 60, destinationNaptanId: 'B', direction: undefined })],
+      models,
+      { stationName }
+    );
+    expect(trains).toHaveLength(0);
   });
 
   it('does not rebuild a train the line already identified', () => {
