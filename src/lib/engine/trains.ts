@@ -49,6 +49,8 @@ const usable = (p: Prediction): boolean =>
   p.timeToStation >= 0;
 /** Two predictions for one train land on the same point of the time axis, give or take jitter. */
 const CLUSTER_MINUTES = 0.75;
+/** Two arrivals this close at the same stop, in the same direction, are one train. */
+const SAME_TRAIN_MS = 60_000;
 
 export interface TrainOptions {
   stationName: (id: string) => string;
@@ -248,6 +250,17 @@ export function buildTrains(
     if (train) trains.push(train);
   }
 
-  trains.push(...inferTrains(anonymous, models, options));
-  return trains.sort((a, b) => a.x - b.x);
+  // A line can publish an id for some of a train's predictions and not others; the rebuilt copy
+  // of an already-identified train has to go, or it counts twice and invents a bunched pair.
+  const known = inferTrains(anonymous, models, options).filter(
+    (candidate) =>
+      !trains.some(
+        (train) =>
+          train.direction === candidate.direction &&
+          train.next === candidate.next &&
+          Math.abs(train.calls[0].at - candidate.calls[0].at) < SAME_TRAIN_MS
+      )
+  );
+
+  return [...trains, ...known].sort((a, b) => a.x - b.x);
 }

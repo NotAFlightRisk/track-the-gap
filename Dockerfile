@@ -1,4 +1,5 @@
-FROM node:22-alpine AS build
+# Built once on the native platform; the output is plain JS, so arm64 never has to emulate.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci

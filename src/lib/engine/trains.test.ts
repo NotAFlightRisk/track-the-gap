@@ -147,6 +147,18 @@ describe('trains TfL will not identify', () => {
     expect(trains).toHaveLength(2);
   });
 
+  it('does not rebuild a train the line already identified', () => {
+    const trains = buildTrains(
+      [
+        call({ vehicleId: '303', naptanId: 'B', timeToStation: 60, destinationNaptanId: 'C' }),
+        anon({ naptanId: 'B', timeToStation: 70, destinationNaptanId: 'C' })
+      ],
+      [inbound],
+      { stationName }
+    );
+    expect(trains.map((t) => t.vehicleId)).toEqual(['303']);
+  });
+
   it('does not put an inferred train on the wrong direction', () => {
     const trains = buildTrains(
       [anon({ naptanId: 'B', timeToStation: 60, destinationNaptanId: 'C', direction: undefined })],
