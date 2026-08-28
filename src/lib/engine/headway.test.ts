@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classify, HEALTH } from '$lib/config/health';
+import { byUnhappiness, classify, HEALTH, type HealthStatus } from '$lib/config/health';
 import type { DirectionModel, Segment } from '$lib/network/types';
 import { arrivalsOn, expectedAt, londonClock, measure } from './headway';
 import type { Train } from './trains';
@@ -145,5 +145,22 @@ describe('arrivalsOn', () => {
     const late = train('late', ['A', 'B'], null);
     late.calls[1].at = 999_000;
     expect(arrivalsOn(segment, [late, early]).map((f) => f.train.id)).toEqual(['early', 'late']);
+  });
+});
+
+describe('byUnhappiness', () => {
+  const line = (name: string, status: HealthStatus, ratio: number | null) => ({
+    name,
+    status,
+    ratio
+  });
+
+  it('puts the worst reading first, then the one furthest from its timetable', () => {
+    const board = [
+      line('Circle', 'normal', 1.05),
+      line('Bakerloo', 'gap', 1.1),
+      line('Metropolitan', 'gap', 2.2)
+    ].sort(byUnhappiness);
+    expect(board.map((l) => l.name)).toEqual(['Metropolitan', 'Bakerloo', 'Circle']);
   });
 });

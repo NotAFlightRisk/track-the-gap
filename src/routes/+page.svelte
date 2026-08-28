@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { STATUS_RANK } from '$lib/config/health';
+  import { byUnhappiness } from '$lib/config/health';
   import Legend from '$lib/components/Legend.svelte';
   import LineRow from '$lib/components/LineRow.svelte';
   import NetworkSummary from '$lib/components/NetworkSummary.svelte';
@@ -23,9 +23,7 @@
   const view = $derived(live.data);
   const lines = $derived(
     [...view.lines].sort((a, b) =>
-      order === 'name'
-        ? a.name.localeCompare(b.name)
-        : STATUS_RANK[b.status] - STATUS_RANK[a.status] || a.name.localeCompare(b.name)
+      order === 'name' ? a.name.localeCompare(b.name) : byUnhappiness(a, b)
     )
   );
 </script>

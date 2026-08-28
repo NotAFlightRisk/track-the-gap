@@ -72,6 +72,15 @@ export const STATUS_RANK: Record<HealthStatus, number> = {
   'no-data': 0
 };
 
+/** Worst reading first, then furthest from its own timetable, then alphabetical. */
+export const byUnhappiness = (
+  a: { status: HealthStatus; ratio: number | null; name: string },
+  b: { status: HealthStatus; ratio: number | null; name: string }
+): number =>
+  STATUS_RANK[b.status] - STATUS_RANK[a.status] ||
+  (b.ratio ?? 0) - (a.ratio ?? 0) ||
+  a.name.localeCompare(b.name);
+
 /** The level the unhappiest slice of a set of sections reaches, so one bad section can't shout. */
 export function quantileStatus(
   statuses: HealthStatus[],

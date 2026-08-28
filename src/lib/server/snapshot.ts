@@ -1,4 +1,4 @@
-import { STATUS_RANK, quantileStatus, type HealthStatus } from '$lib/config/health';
+import { byUnhappiness, quantileStatus, type HealthStatus } from '$lib/config/health';
 import { LINES, lineById } from '$lib/config/lines';
 import { arrivalsOn, expectedAt, londonClock, measure, EMPTY } from '$lib/engine/headway';
 import { buildTrains, type Train } from '$lib/engine/trains';
@@ -306,11 +306,7 @@ export async function networkView(): Promise<NetworkView> {
   }
   return {
     meta,
-    lines: lines
-      .map(summarise)
-      .sort(
-        (a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status] || a.name.localeCompare(b.name)
-      ),
+    lines: lines.map(summarise).sort(byUnhappiness),
     counts,
     trains: lines.reduce((total, line) => total + line.trains, 0)
   };
