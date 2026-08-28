@@ -28,6 +28,8 @@ export interface HealthConfig {
   serviceDayStartsAt: number;
   /** Share of a line's sections that must reach a level before the whole line is called that. */
   severityQuantile: number;
+  /** Share of a set's sections that must be measurable before it is judged at all. */
+  minCoverage: number;
 }
 
 export const HEALTH: HealthConfig = {
@@ -37,7 +39,8 @@ export const HEALTH: HealthConfig = {
   minExcessSeconds: 180,
   horizonSeconds: 1800,
   serviceDayStartsAt: 4,
-  severityQuantile: 0.25
+  severityQuantile: 0.25,
+  minCoverage: 0.25
 };
 
 interface Judgement {
@@ -84,15 +87,15 @@ export const byUnhappiness = (
   (b.ratio ?? 0) - (a.ratio ?? 0) ||
   a.name.localeCompare(b.name);
 
-/** The level the unhappiest slice of a set of sections reaches, so one bad section can't shout. */
+/** The level the unhappiest slice reaches, once enough of the set is measurable to have a view. */
 export function quantileStatus(
   statuses: HealthStatus[],
-  quantile = HEALTH.severityQuantile
+  config: HealthConfig = HEALTH
 ): HealthStatus {
   const judged = statuses.filter((status) => status !== 'no-data');
-  if (!judged.length) return 'no-data';
+  if (judged.length < Math.max(1, statuses.length * config.minCoverage)) return 'no-data';
   const ranked = judged.sort((a, b) => STATUS_RANK[b] - STATUS_RANK[a]);
-  return ranked[Math.min(ranked.length - 1, Math.floor(quantile * ranked.length))];
+  return ranked[Math.min(ranked.length - 1, Math.floor(config.severityQuantile * ranked.length))];
 }
 
 export interface StatusMeta {
