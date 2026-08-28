@@ -7,7 +7,15 @@ import {
   type HealthStatus
 } from '$lib/config/health';
 import type { DirectionModel, Segment } from '$lib/network/types';
-import { arrivalsOn, expectedAt, gapIn, londonClock, measure, worstGapOf } from './headway';
+import {
+  arrivalsOn,
+  expectedAt,
+  gapIn,
+  londonClock,
+  measure,
+  rollupHeadway,
+  worstGapOf
+} from './headway';
 import type { Train } from './trains';
 
 const at = (...minutes: number[]) => minutes.map((m) => m * 60_000);
@@ -204,6 +212,56 @@ describe('byUnhappiness', () => {
       line('Metropolitan', 'gap', 2.2)
     ].sort(byUnhappiness);
     expect(board.map((l) => l.name)).toEqual(['Metropolitan', 'Bakerloo', 'Circle']);
+  });
+});
+
+describe('rollupHeadway', () => {
+  const measured = (minutes: number, expected: number) => measure(at(0, minutes), expected);
+  const dark = (count: number): HealthStatus[] => Array<HealthStatus>(count).fill('no-data');
+  const judged = (count: number): HealthStatus[] => Array<HealthStatus>(count).fill('normal');
+
+  it('stands one headway in for a set it can see enough of', () => {
+    const rolled = rollupHeadway([measured(4, 240), measured(6, 240), measured(8, 240)], judged(3));
+    expect(rolled.observed).toBe(360);
+    expect(rolled.expected).toBe(240);
+    expect(rolled.ratio).toBe(1.5);
+  });
+
+  it('names no wait for a line it has just called unjudgeable', () => {
+    const rolled = rollupHeadway([measured(10, 420)], ['degraded', ...dark(67)]);
+    expect(rolled.observed).toBeNull();
+    expect(rolled.expected).toBeNull();
+    expect(rolled.ratio).toBeNull();
+  });
+
+  it('still speaks for a set measured right down to the floor', () => {
+    const parts = [measured(4, 240), measured(6, 240), measured(8, 240), measured(10, 240)];
+    expect(rollupHeadway(parts, [...judged(4), ...dark(12)]).observed).toBe(420);
+  });
+
+  it('takes the floor from the config it is given', () => {
+    const parts = [measured(4, 240), measured(6, 240), measured(8, 240), measured(10, 240)];
+    const strict = { ...HEALTH, minCoverage: 0.5 };
+    expect(rollupHeadway(parts, [...judged(4), ...dark(12)], strict).observed).toBeNull();
+  });
+
+  it('skips the sections that never got a reading of their own', () => {
+    const rolled = rollupHeadway([measure(at(3), 240), measured(6, 240)], ['no-data', 'normal']);
+    expect(rolled.observed).toBe(360);
+  });
+
+  it('leaves out a section it measured but has no timetable for', () => {
+    const rolled = rollupHeadway(
+      [measure(at(0, 20), null), measured(6, 240)],
+      ['no-data', 'normal']
+    );
+    expect(rolled.observed).toBe(360);
+    expect(rolled.expected).toBe(240);
+    expect(rolled.ratio).toBe(1.5);
+  });
+
+  it('has nothing to say when nothing was measured', () => {
+    expect(rollupHeadway([], []).observed).toBeNull();
   });
 });
 
