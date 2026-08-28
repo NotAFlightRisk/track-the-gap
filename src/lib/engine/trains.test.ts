@@ -68,6 +68,34 @@ describe('buildTrains', () => {
     expect(trains[0].direction).toBe('outbound');
   });
 
+  it('falls back to the only direction that can reach the stop', () => {
+    const trains = buildTrains([call({ naptanId: 'A', direction: undefined })], models, {
+      stationName
+    });
+    expect(trains.map((t) => t.direction)).toEqual(['outbound']);
+  });
+
+  it('leaves a stop both directions can reach alone', () => {
+    const trains = buildTrains([call({ naptanId: 'B', direction: undefined })], models, {
+      stationName
+    });
+    expect(trains).toHaveLength(0);
+  });
+
+  it('rebuilds a two-station shuttle from its terminus predictions', () => {
+    const shuttle = [direction('inbound', ['P', 'Q']), direction('outbound', ['Q', 'P'])];
+    const trains = buildTrains(
+      [
+        call({ naptanId: 'Q', direction: undefined, platformName: 'Eastbound - Platform 8' }),
+        call({ naptanId: 'Q', direction: undefined, platformName: 'Westbound - Platform 7' })
+      ],
+      shuttle,
+      { stationName }
+    );
+    expect(trains).toHaveLength(1);
+    expect(trains[0].direction).toBe('inbound');
+  });
+
   it('places a train back from its next stop by its own eta', () => {
     const [train] = buildTrains([call({ naptanId: 'C', timeToStation: 60 })], models, {
       stationName
