@@ -1,0 +1,51 @@
+name: 🗺️ Network
+
+on:
+  schedule:
+    - cron: '17 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: network
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: 🗺️ Rebuild the model
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'NotAFlightRisk'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ask TfL what the network looks like now
+        env:
+          TFL_APP_KEY: ${{ secrets.TFL_APP_KEY }}
+        run: npm run network
+      - run: npm test
+      - name: Open a pull request if anything moved
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- src/lib/data/network.json; then
+            echo "No change to the network model" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          branch="network/$(date +%Y-%m-%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "chore(data): refresh the network model"
+          git push -u origin "$branch"
+          gh pr create --fill --title "chore(data): refresh the network model" \
+            --body "Topology, run times and timetabled headways, straight off the TfL API."
+          echo "Opened a pull request from \`$branch\`" >> "$GITHUB_STEP_SUMMARY"

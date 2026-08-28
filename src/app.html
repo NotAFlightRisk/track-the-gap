@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en-GB" data-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="%sveltekit.assets%/roundel.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="%sveltekit.assets%/roundel.png" />
+    <link rel="manifest" href="%sveltekit.assets%/site.webmanifest" />
+    <meta name="theme-color" content="#113b92" />
+    %sveltekit.head%
+    <script>
+      document.documentElement.dataset.theme = localStorage.getItem('theme') ?? 'auto';
+    </script>
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>

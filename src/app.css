@@ -1,0 +1,217 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource/hammersmith-one';
+
+:root {
+  color-scheme: light dark;
+
+  --font-display: 'Hammersmith One', ui-sans-serif, system-ui, sans-serif;
+  --font-text: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --brand: #113b92;
+  --brand-bright: light-dark(#113b92, #4f7ce0);
+  --brand-ink: #ffffff;
+
+  --page: light-dark(#eef0f3, #0b0e14);
+  --surface: light-dark(#ffffff, #141a24);
+  --surface-sunk: light-dark(#f6f7f9, #10151d);
+  --rule: light-dark(#dde1e7, #232b38);
+  --rule-strong: light-dark(#b9c1cc, #3a4453);
+
+  --text: light-dark(#0d1117, #e9edf3);
+  --text-muted: light-dark(#57606e, #9aa5b4);
+  --text-faint: light-dark(#79828f, #79838f);
+
+  --normal: light-dark(#0a7a45, #3cc57f);
+  --degraded: light-dark(#9a5a00, #eaa63f);
+  --gap: light-dark(#bd1220, #ff7070);
+  --bunching: light-dark(#6a2cba, #b592f2);
+  --severe: light-dark(#8a0a16, #ff4f61);
+  --no-data: light-dark(#727c89, #6d7784);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-pill: 999px;
+
+  --shadow:
+    0 1px 2px light-dark(rgb(16 24 40 / 0.06), rgb(0 0 0 / 0.4)),
+    0 12px 28px -16px light-dark(rgb(16 24 40 / 0.28), rgb(0 0 0 / 0.7));
+
+  --measure: 68ch;
+  --wide: 1360px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --swap: 600ms;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font-text);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.6rem);
+}
+
+h3 {
+  font-size: 1.05rem;
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--brand-bright);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--brand-bright);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border-radius: var(--radius-pill);
+}
+
+/* Any element can name a health status and pick up its colour. */
+[data-status='normal'] {
+  --status: var(--normal);
+}
+[data-status='degraded'] {
+  --status: var(--degraded);
+}
+[data-status='gap'] {
+  --status: var(--gap);
+}
+[data-status='bunching'] {
+  --status: var(--bunching);
+}
+[data-status='severe'] {
+  --status: var(--severe);
+}
+[data-status='no-data'] {
+  --status: var(--no-data);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'ss01';
+}
+
+.shell {
+  width: min(100% - var(--space-5) * 2, var(--wide));
+  margin-inline: auto;
+}
+
+.skip {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 20;
+  padding: var(--space-2) var(--space-4);
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-radius: var(--radius-md);
+  transform: translateY(-200%);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --swap: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

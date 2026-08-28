@@ -1,0 +1,13 @@
+{
+  "name": "Track the Gap",
+  "short_name": "Track the Gap",
+  "description": "Live London Underground headways and service health",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#113b92",
+  "icons": [
+    { "src": "/roundel.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/roundel.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

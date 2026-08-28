@@ -1,0 +1,47 @@
+{
+  "name": "track-the-gap",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node build/index.js",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "test": "vitest run",
+    "network": "node scripts/build-network.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/hammersmith-one": "^5.3.0",
+    "@sveltejs/adapter-node": "^5.3.3",
+    "@sveltejs/adapter-vercel": "^6.0.2",
+    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@types/node": "^26.2.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-svelte": "^4.1.1",
+    "svelte": "^5.56.10",
+    "svelte-check": "^4.6.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  },
+  "description": "Live London Underground headways, service gaps and train bunching",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NotAFlightRisk/track-the-gap.git"
+  },
+  "homepage": "https://track-the-gap.peng.ly",
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
+  },
+  "overrides": {
+    "cookie": "^0.7.0"
+  }
+}
