@@ -47,7 +47,10 @@ Or use the button 👇
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNotAFlightRisk%2Ftrack-the-gap&env=TFL_APP_KEY)
 
-Our own copy at [track-the-gap.peng.ly](https://track-the-gap.peng.ly/) deploys itself off `main`.
+For Cloudflare Workers it's `ADAPTER=cloudflare npm run build` then `npx wrangler deploy` - the
+config is already in `wrangler.jsonc`, and the app needs `wrangler secret put TFL_APP_KEY` once.
+That's what [track-the-gap.peng.ly](https://track-the-gap.peng.ly/) runs on, deploying itself off
+`main`.
 
 ---
 

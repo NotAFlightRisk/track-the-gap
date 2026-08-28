@@ -72,7 +72,7 @@
   }
 
   .name {
-    font-size: 1.15rem;
+    font-size: 1.5rem;
 
     .badge {
       display: inline-block;

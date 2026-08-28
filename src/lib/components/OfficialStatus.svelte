@@ -26,19 +26,20 @@
     font-weight: 600;
     line-height: 1.4;
 
+    /* Mixed toward the page's own ink so the tinted tag clears 4.5:1 in both themes. */
     &[data-tone='good'] {
       background: color-mix(in oklab, var(--normal) 14%, var(--surface));
-      color: var(--normal);
+      color: color-mix(in oklab, var(--normal) 55%, var(--text));
     }
 
     &[data-tone='minor'] {
       background: color-mix(in oklab, var(--degraded) 16%, var(--surface));
-      color: var(--degraded);
+      color: color-mix(in oklab, var(--degraded) 55%, var(--text));
     }
 
     &[data-tone='major'] {
       background: color-mix(in oklab, var(--gap) 14%, var(--surface));
-      color: var(--gap);
+      color: color-mix(in oklab, var(--gap) 55%, var(--text));
     }
   }
 
