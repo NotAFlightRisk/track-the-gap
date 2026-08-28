@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { byUnhappiness, classify, HEALTH, type HealthStatus } from '$lib/config/health';
+import {
+  byUnhappiness,
+  classify,
+  HEALTH,
+  quantileStatus,
+  type HealthStatus
+} from '$lib/config/health';
 import type { DirectionModel, Segment } from '$lib/network/types';
 import { arrivalsOn, expectedAt, gapIn, londonClock, measure, worstGapOf } from './headway';
 import type { Train } from './trains';
@@ -198,5 +204,49 @@ describe('byUnhappiness', () => {
       line('Metropolitan', 'gap', 2.2)
     ].sort(byUnhappiness);
     expect(board.map((l) => l.name)).toEqual(['Metropolitan', 'Bakerloo', 'Circle']);
+  });
+});
+
+describe('quantileStatus', () => {
+  const line = (judged: HealthStatus[], unmeasured: number): HealthStatus[] => [
+    ...judged,
+    ...Array<HealthStatus>(unmeasured).fill('no-data')
+  ];
+
+  it('takes the level the unhappiest quarter reaches', () => {
+    expect(quantileStatus(['severe', 'gap', 'normal', 'normal'])).toBe('gap');
+  });
+
+  it('judges a line on the sections it can measure', () => {
+    expect(quantileStatus(line(['gap', 'gap', 'normal', 'normal'], 4))).toBe('gap');
+  });
+
+  it('judges a line measured right down to the floor', () => {
+    expect(quantileStatus(line(['gap', 'gap', 'normal', 'normal'], 12))).toBe('gap');
+  });
+
+  it('will not call a line bunched off six sections out of sixty-eight', () => {
+    expect(quantileStatus(line(Array<HealthStatus>(6).fill('bunching'), 62))).toBe('no-data');
+  });
+
+  it('still judges a two section line that is fully measured', () => {
+    expect(quantileStatus(['bunching', 'normal'])).toBe('bunching');
+  });
+
+  it('judges a two section line off the one section it can measure', () => {
+    expect(quantileStatus(['bunching', 'no-data'])).toBe('bunching');
+  });
+
+  it('takes the floor from the config it is given', () => {
+    const strict = { ...HEALTH, minCoverage: 0.5 };
+    expect(quantileStatus(line(['gap', 'gap', 'normal', 'normal'], 12), strict)).toBe('no-data');
+  });
+
+  it('has nothing to say when nothing was measured', () => {
+    expect(quantileStatus(line([], 12))).toBe('no-data');
+  });
+
+  it('has nothing to say about a set with no sections at all', () => {
+    expect(quantileStatus([])).toBe('no-data');
   });
 });
