@@ -1,5 +1,5 @@
 # Built once on the native platform; the output is plain JS, so arm64 never has to emulate.
-FROM --platform=$BUILDPLATFORM node:22-alpine AS build
+FROM --platform=$BUILDPLATFORM node:25-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -7,7 +7,7 @@ COPY . .
 ENV ADAPTER=node
 RUN npm run build && npm prune --omit=dev
 
-FROM node:22-alpine
+FROM node:25-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
