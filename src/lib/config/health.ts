@@ -87,14 +87,20 @@ export const byUnhappiness = (
   (b.ratio ?? 0) - (a.ratio ?? 0) ||
   a.name.localeCompare(b.name);
 
+/** Enough of a set can be measured for the set to say anything about itself. */
+export const isMeasurable = (statuses: HealthStatus[], config: HealthConfig = HEALTH): boolean =>
+  statuses.filter((status) => status !== 'no-data').length >=
+  Math.max(1, statuses.length * config.minCoverage);
+
 /** The level the unhappiest slice reaches, once enough of the set is measurable to have a view. */
 export function quantileStatus(
   statuses: HealthStatus[],
   config: HealthConfig = HEALTH
 ): HealthStatus {
-  const judged = statuses.filter((status) => status !== 'no-data');
-  if (judged.length < Math.max(1, statuses.length * config.minCoverage)) return 'no-data';
-  const ranked = judged.sort((a, b) => STATUS_RANK[b] - STATUS_RANK[a]);
+  if (!isMeasurable(statuses, config)) return 'no-data';
+  const ranked = statuses
+    .filter((status) => status !== 'no-data')
+    .sort((a, b) => STATUS_RANK[b] - STATUS_RANK[a]);
   return ranked[Math.min(ranked.length - 1, Math.floor(config.severityQuantile * ranked.length))];
 }
 

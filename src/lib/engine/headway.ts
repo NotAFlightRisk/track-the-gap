@@ -1,4 +1,11 @@
-import { classify, HEALTH, isGap, type HealthConfig, type HealthStatus } from '$lib/config/health';
+import {
+  classify,
+  HEALTH,
+  isGap,
+  isMeasurable,
+  type HealthConfig,
+  type HealthStatus
+} from '$lib/config/health';
 import type { DayType, DirectionModel, Segment } from '$lib/network/types';
 import type { Train } from './trains';
 
@@ -46,6 +53,27 @@ const median = (values: number[]): number => {
   const mid = sorted.length >> 1;
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 };
+
+/** Median of whichever parts have a reading at all. */
+const medianOf = (values: (number | null)[]): number | null => {
+  const found = values.filter((value): value is number => value !== null);
+  return found.length ? median(found) : null;
+};
+
+/** One headway for a whole set of sections, withheld until enough of the set is measurable. */
+export function rollupHeadway(
+  parts: Headway[],
+  sections: HealthStatus[],
+  config: HealthConfig = HEALTH
+): Headway {
+  if (!isMeasurable(sections, config)) return EMPTY;
+  // Only sections carrying both readings, so the pair always compares like with like.
+  const read = parts.filter((part) => part.observed !== null && part.expected !== null);
+  const observed = medianOf(read.map((part) => part.observed));
+  const expected = medianOf(read.map((part) => part.expected));
+  if (observed === null) return EMPTY;
+  return { ...EMPTY, observed, expected, ratio: observed && expected ? observed / expected : null };
+}
 
 function coefficientOfVariation(values: number[]): number | null {
   if (values.length < 2) return null;

@@ -6,8 +6,8 @@ import {
   gapIn,
   londonClock,
   measure,
-  worstGapOf,
-  EMPTY
+  rollupHeadway,
+  worstGapOf
 } from '$lib/engine/headway';
 import { buildTrains, type Train } from '$lib/engine/trains';
 import type { DirectionModel, Segment } from '$lib/network/types';
@@ -35,13 +35,6 @@ const emptyCounts = (): StatusCounts => ({
   severe: 0,
   'no-data': 0
 });
-
-const median = (values: number[]): number | null => {
-  if (!values.length) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = sorted.length >> 1;
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-};
 
 const interchangesAt = (() => {
   const map = new Map<string, Set<string>>();
@@ -142,11 +135,7 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
       .filter((g): g is Gap => g !== null)
   );
 
-  const judged = segments.filter((s) => s.headway.observed !== null);
-  const observed = median(judged.map((s) => s.headway.observed!));
-  const expected = median(
-    judged.map((s) => s.headway.expected).filter((v): v is number => v !== null)
-  );
+  const statuses = segments.map((s) => s.headway.status);
   const xs = Object.values(model.layout).map((p) => p.x);
 
   const stations: StationView[] = Object.entries(model.layout).map(([id, place]) => ({
@@ -176,10 +165,11 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
       segment: train.from ? `${train.from}>${train.next}` : null
     })),
     patterns: model.patterns.map((p) => ({ id: p.id, name: p.name })),
-    headway: judged.length
-      ? { ...EMPTY, observed, expected, ratio: observed && expected ? observed / expected : null }
-      : EMPTY,
-    status: quantileStatus(segments.map((s) => s.headway.status)),
+    headway: rollupHeadway(
+      segments.map((s) => s.headway),
+      statuses
+    ),
+    status: quantileStatus(statuses),
     counts,
     worstGap
   };
@@ -209,11 +199,10 @@ function buildLine(
     directions.map((d) => d.worstGap).filter((g): g is Gap => g !== null)
   );
 
-  const observed = median(
-    directions.map((d) => d.headway.observed).filter((v): v is number => v !== null)
-  );
-  const expected = median(
-    directions.map((d) => d.headway.expected).filter((v): v is number => v !== null)
+  const sections = directions.flatMap((d) => d.segments.map((s) => s.headway.status));
+  const { observed, expected, ratio } = rollupHeadway(
+    directions.map((d) => d.headway),
+    sections
   );
   const busiest = [...directions].sort((a, b) => b.trains.length - a.trains.length)[0];
 
@@ -229,10 +218,10 @@ function buildLine(
     official: official
       ? { severity: official.severity, description: official.description, reason: official.reason }
       : { severity: 10, description: 'Unknown', reason: null },
-    status: quantileStatus(directions.flatMap((d) => d.segments.map((s) => s.headway.status))),
+    status: quantileStatus(sections),
     observed,
     expected,
-    ratio: observed && expected ? observed / expected : null,
+    ratio,
     worstGap,
     trains: trains.length,
     counts,
