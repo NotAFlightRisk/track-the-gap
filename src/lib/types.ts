@@ -16,6 +16,7 @@ export interface Gap {
   from: string;
   to: string;
   direction: Direction;
+  towards: string;
 }
 
 export interface StationView {
@@ -58,6 +59,8 @@ export interface TrainView {
   eta: number;
   nextName: string;
   location: string;
+  /** The section it is running over, so hovering a train opens that section. */
+  segment: string | null;
 }
 
 export type StatusCounts = Record<HealthStatus, number>;

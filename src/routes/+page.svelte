@@ -172,7 +172,7 @@
         1fr
       );
     gap: var(--space-5);
-    padding: var(--space-2) var(--space-4) var(--space-2) calc(var(--space-5) + 6px);
+    padding: var(--space-2) var(--space-4);
     border-block-end: 2px solid var(--rule-strong);
     font-size: 0.7rem;
     font-weight: 700;

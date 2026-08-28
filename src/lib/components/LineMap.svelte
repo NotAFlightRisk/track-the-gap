@@ -12,8 +12,8 @@
 
   const { direction, colour, selected, onselect }: Props = $props();
 
-  const PX_PER_MIN = 26;
-  const ROW_HEIGHT = 124;
+  const PX_PER_MIN = 32;
+  const ROW_HEIGHT = 132;
   const TOP = 54;
   const SIDE = 28;
 
@@ -114,7 +114,13 @@
 
     <g class="trains">
       {#each direction.trains as train (train.id)}
-        <g class="train" style:--x="{at(train.x)}px" style:--y="{lane(train.row)}px">
+        <g
+          class="train"
+          style:--x="{at(train.x)}px"
+          style:--y="{lane(train.row)}px"
+          onmouseenter={() => train.segment && onselect(train.segment)}
+          role="presentation"
+        >
           <circle r="6.5" />
           <title>{train.towards} · {eta(train.eta)} to {train.nextName}</title>
         </g>
@@ -124,16 +130,29 @@
 </div>
 
 <style>
+  /* Edge shadows appear only on the side there is more map to scroll to. */
   .frame {
     overflow-x: auto;
     overscroll-behavior-x: contain;
     padding-block-end: var(--space-2);
-    background: var(--surface);
+    background:
+      linear-gradient(to right, var(--surface) 40%, transparent) left / 48px 100% no-repeat local,
+      linear-gradient(to left, var(--surface) 40%, transparent) right / 48px 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.18), transparent) left / 16px 100%
+        no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.18), transparent) right / 16px 100%
+        no-repeat scroll,
+      var(--surface);
   }
 
   svg {
     display: block;
     height: auto;
+  }
+
+  .ruler,
+  .stations {
+    pointer-events: none;
   }
 
   .ruler {
@@ -166,6 +185,11 @@
       stroke-linecap: round;
     }
 
+    &[data-status='no-data'] .track {
+      stroke-width: 3.5;
+      opacity: 0.5;
+    }
+
     .hatch {
       stroke: var(--surface);
       stroke-width: 7;
@@ -178,8 +202,9 @@
       stroke-width: 11;
     }
 
-    &.selected .track {
+    &.selected .hit {
       stroke: var(--text);
+      stroke-width: 17;
     }
 
     &:focus-visible {

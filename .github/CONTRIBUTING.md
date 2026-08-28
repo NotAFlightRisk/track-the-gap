@@ -19,7 +19,7 @@ Bug reports, typo fixes and whole features are all welcome. By joining in, you a
 
 ```bash
 git clone git@github.com:NotAFlightRisk/track-the-gap.git
-cd repo
+cd track-the-gap
 npm install
 npm run dev
 ```

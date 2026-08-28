@@ -14,7 +14,9 @@
 
 <article class="row" style:--line={line.colour} style:--ink={line.ink}>
   <h3 class="name">
-    <a href="/{line.slug}">{line.name}<span class="visually-hidden"> line</span></a>
+    <a href="/{line.slug}">
+      <span class="badge">{line.name}</span><span class="visually-hidden"> line</span>
+    </a>
   </h3>
 
   <div class="official">
@@ -39,7 +41,7 @@
       <dd>
         {headway(line.worstGap?.seconds ?? null)}
         {#if line.worstGap}
-          <small>{line.worstGap.from} → {line.worstGap.to}</small>
+          <small>{line.worstGap.from} → {line.worstGap.to}<br />{line.worstGap.towards}</small>
         {/if}
       </dd>
     </div>
@@ -60,10 +62,9 @@
       );
     align-items: center;
     gap: var(--space-3) var(--space-5);
-    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+    padding: var(--space-4);
     border-block-end: 1px solid var(--rule);
     background: var(--surface);
-    border-inline-start: 6px solid var(--line);
 
     &:hover {
       background: color-mix(in oklab, var(--line) 6%, var(--surface));
@@ -72,6 +73,14 @@
 
   .name {
     font-size: 1.15rem;
+
+    .badge {
+      display: inline-block;
+      padding: 0.15em 0.6em;
+      background: var(--line);
+      color: var(--ink);
+      white-space: nowrap;
+    }
 
     a {
       color: var(--text);
@@ -83,8 +92,9 @@
         inset: 0;
       }
 
-      &:hover {
-        text-decoration: underline;
+      &:hover .badge {
+        outline: 2px solid var(--text);
+        outline-offset: 2px;
       }
     }
   }

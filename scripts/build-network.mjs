@@ -123,10 +123,9 @@ function hourlyHeadways(times) {
   return hours.some(Boolean) ? hours : null;
 }
 
-// Patterns run longest-first so the busiest route becomes row 0 and branches hang off it.
+// Minutes along the route from the longest pattern's origin. Rows are worked out in the app.
 function layout(patterns, runTime) {
   const x = new Map();
-  const row = new Map();
   const ordered = [...patterns].sort((a, b) => b.stops.length - a.stops.length);
 
   for (const pattern of ordered) {
@@ -142,19 +141,11 @@ function layout(patterns, runTime) {
     for (let i = anchor - 1; i >= 0; i--) {
       if (!x.has(stops[i])) x.set(stops[i], x.get(stops[i + 1]) - runTime(stops[i], stops[i + 1]));
     }
-    const fresh = stops.filter((s) => !row.has(s));
-    if (fresh.length) {
-      const next = row.size ? Math.max(...row.values()) + 1 : 0;
-      for (const stop of fresh) row.set(stop, next);
-    }
   }
 
   const shift = Math.min(...x.values());
   return Object.fromEntries(
-    [...x].map(([stop, at]) => [
-      stop,
-      { x: Math.round((at - shift) * 100) / 100, row: row.get(stop) ?? 0 }
-    ])
+    [...x].map(([stop, at]) => [stop, { x: Math.round((at - shift) * 100) / 100 }])
   );
 }
 

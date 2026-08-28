@@ -112,6 +112,7 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
   const mine = trains.filter((t) => t.direction === model.direction);
   const patterns = new Map(model.patterns.map((p) => [p.id, p.name]));
   const segments = model.segments.map((s) => buildSegment(s, model, mine, patterns, context));
+  const towards = directionLabel(model);
 
   const counts = emptyCounts();
   let worstGap: Gap | null = null;
@@ -124,7 +125,8 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
         ratio: segment.headway.worstRatio,
         from: segment.fromName,
         to: segment.toName,
-        direction: model.direction
+        direction: model.direction,
+        towards
       };
     }
   }
@@ -144,7 +146,7 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
 
   return {
     direction: model.direction,
-    label: directionLabel(model),
+    label: towards,
     span: Math.max(...xs, 1),
     rows: Math.max(...stations.map((s) => s.row)) + 1,
     stations: stations.sort((a, b) => a.x - b.x),
@@ -157,7 +159,8 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
       towards: train.towards,
       eta: train.eta,
       nextName: stationName(train.next),
-      location: train.location
+      location: train.location,
+      segment: train.from ? `${train.from}>${train.next}` : null
     })),
     patterns: model.patterns.map((p) => ({ id: p.id, name: p.name })),
     headway: judged.length

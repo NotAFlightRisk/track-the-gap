@@ -1,7 +1,16 @@
 import raw from '$lib/data/network.json';
+import { packRows } from '$lib/network/rows';
 import type { DirectionModel, LineModel, NetworkModel, Segment } from '$lib/network/types';
 
 export const network = raw as unknown as NetworkModel;
+
+// Rows are how the map reads, not what TfL publishes, so they are packed here rather than baked in.
+for (const line of network.lines) {
+  for (const direction of line.directions) {
+    const rows = packRows(direction.patterns, direction.layout);
+    for (const [stop, place] of Object.entries(direction.layout)) place.row = rows.get(stop) ?? 0;
+  }
+}
 
 export interface DirectionIndex {
   model: DirectionModel;

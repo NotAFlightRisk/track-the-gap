@@ -129,12 +129,19 @@
         </header>
 
         <div class="split">
-          <LineMap
-            {direction}
-            colour={line.colour}
-            selected={picked?.direction === direction.direction ? picked.key : null}
-            onselect={(key) => (picked = { direction: direction.direction, key })}
-          />
+          <div class="map">
+            <LineMap
+              {direction}
+              colour={line.colour}
+              selected={picked?.direction === direction.direction ? picked.key : null}
+              onselect={(key) => (picked = { direction: direction.direction, key })}
+            />
+            <p class="axis">
+              {direction.stations[0]?.name} to {direction.stations.at(-1)?.name}, {Math.round(
+                direction.span
+              )} minutes end to end, drawn to that scale.
+            </p>
+          </div>
           <SegmentPanel
             segment={picked?.direction === direction.direction ? selected : null}
             label={selectedLabel}
@@ -281,6 +288,17 @@
     grid-template-columns: minmax(0, 1fr) 21rem;
     gap: var(--space-4);
     align-items: start;
+  }
+
+  .split :global(.panel) {
+    position: sticky;
+    inset-block-start: var(--space-4);
+  }
+
+  .axis {
+    margin: var(--space-2) 0 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
   }
 
   .table {
