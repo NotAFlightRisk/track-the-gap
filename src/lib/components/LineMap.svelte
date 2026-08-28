@@ -7,10 +7,11 @@
     direction: DirectionView;
     colour: string;
     selected: string | null;
+    detailsId: string;
     onselect: (key: string) => void;
   }
 
-  const { direction, colour, selected, onselect }: Props = $props();
+  const { direction, colour, selected, detailsId, onselect }: Props = $props();
 
   const PX_PER_MIN = 32;
   const ROW_HEIGHT = 132;
@@ -62,6 +63,8 @@
         role="button"
         tabindex="0"
         aria-label={describe(segment)}
+        aria-pressed={selected === segment.key}
+        aria-controls={detailsId}
         onclick={() => onselect(segment.key)}
         onkeydown={(event) => activate(event, segment.key)}
         onmouseenter={() => onselect(segment.key)}

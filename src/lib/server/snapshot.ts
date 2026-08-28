@@ -1,4 +1,4 @@
-import { HEALTH, STATUS_RANK, quantileStatus, type HealthStatus } from '$lib/config/health';
+import { STATUS_RANK, quantileStatus, type HealthStatus } from '$lib/config/health';
 import { LINES, lineById } from '$lib/config/lines';
 import { arrivalsOn, expectedAt, londonClock, measure, EMPTY } from '$lib/engine/headway';
 import { buildTrains, type Train } from '$lib/engine/trains';
@@ -133,7 +133,9 @@ function buildDirection(model: DirectionModel, trains: Train[], context: Context
 
   const judged = segments.filter((s) => s.headway.observed !== null);
   const observed = median(judged.map((s) => s.headway.observed!));
-  const expected = median(judged.map((s) => s.headway.expected ?? HEALTH.fallbackHeadwaySeconds));
+  const expected = median(
+    judged.map((s) => s.headway.expected).filter((v): v is number => v !== null)
+  );
   const xs = Object.values(model.layout).map((p) => p.x);
 
   const stations: StationView[] = Object.entries(model.layout).map(([id, place]) => ({
@@ -237,7 +239,9 @@ function build(data: LiveData): { lines: LineView[]; meta: Meta } {
   const clock = londonClock(data.fetchedAt);
   const byLine = new Map<string, typeof data.predictions>();
   for (const prediction of data.predictions) {
-    byLine.set(prediction.lineId, (byLine.get(prediction.lineId) ?? []).concat(prediction));
+    const found = byLine.get(prediction.lineId);
+    if (found) found.push(prediction);
+    else byLine.set(prediction.lineId, [prediction]);
   }
 
   const trainsByLine = new Map<string, Train[]>();
@@ -255,12 +259,9 @@ function build(data: LiveData): { lines: LineView[]; meta: Meta } {
           segment,
           trains.filter((t) => t.direction === direction.model.direction)
         );
-        corridorArrivals.set(
-          key,
-          (corridorArrivals.get(key) ?? []).concat(
-            found.map((f) => ({ lineId: index.id, at: f.at }))
-          )
-        );
+        const merged = corridorArrivals.get(key) ?? [];
+        for (const { at } of found) merged.push({ lineId: index.id, at });
+        corridorArrivals.set(key, merged);
       }
     }
   }

@@ -24,10 +24,8 @@ export interface HealthConfig {
   minExcessSeconds: number;
   /** Predictions further out than this are too speculative to count. */
   horizonSeconds: number;
-  /** Below this, a headway is treated as two carriages of the same move, not two trains. */
-  minHeadwaySeconds: number;
-  /** Used when the timetable has nothing to say about a stop. */
-  fallbackHeadwaySeconds: number;
+  /** Hour of the London morning at which a new service day starts. */
+  serviceDayStartsAt: number;
   /** Share of a line's sections that must reach a level before the whole line is called that. */
   severityQuantile: number;
 }
@@ -38,8 +36,7 @@ export const HEALTH: HealthConfig = {
   irregularity: 0.8,
   minExcessSeconds: 180,
   horizonSeconds: 1800,
-  minHeadwaySeconds: 40,
-  fallbackHeadwaySeconds: 300,
+  serviceDayStartsAt: 4,
   severityQuantile: 0.25
 };
 

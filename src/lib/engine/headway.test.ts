@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { classify, HEALTH } from '$lib/config/health';
 import type { DirectionModel, Segment } from '$lib/network/types';
-import { arrivalsOn, expectedAt, measure } from './headway';
+import { arrivalsOn, expectedAt, londonClock, measure } from './headway';
 import type { Train } from './trains';
 
 const at = (...minutes: number[]) => minutes.map((m) => m * 60_000);
@@ -15,8 +15,8 @@ describe('measure', () => {
     expect(headway.status).toBe('normal');
   });
 
-  it('ignores two predictions for the same move', () => {
-    expect(measure(at(0, 0.1, 2), 120).gaps).toEqual([120]);
+  it('keeps a very tight pair rather than reading it as one train', () => {
+    expect(measure(at(0, 0.5, 2), 120).gaps).toEqual([30, 90]);
   });
 
   it('has nothing to say about a single train', () => {
@@ -83,6 +83,13 @@ const model = {
   expected: { 'A>B': { 'mon-thu': Array.from({ length: 24 }, (_, h) => (h === 8 ? 150 : 0)) } }
 } as unknown as DirectionModel;
 
+describe('londonClock', () => {
+  it('keeps the small hours on the previous service day', () => {
+    expect(londonClock(Date.parse('2026-08-29T00:30:00+01:00')).day).toBe('fri');
+    expect(londonClock(Date.parse('2026-08-29T10:30:00+01:00')).day).toBe('sat');
+  });
+});
+
 describe('expectedAt', () => {
   it('reads the timetabled headway for the hour', () => {
     expect(expectedAt(model, 'A>B', { day: 'mon-thu', hour: 8 })).toBe(150);
@@ -92,10 +99,12 @@ describe('expectedAt', () => {
     expect(expectedAt(model, 'A>B', { day: 'mon-thu', hour: 9 })).toBe(150);
   });
 
-  it('falls back to the configured headway two hours out', () => {
-    expect(expectedAt(model, 'A>B', { day: 'mon-thu', hour: 14 })).toBe(
-      HEALTH.fallbackHeadwaySeconds
-    );
+  it('expects nothing at an hour the timetable leaves empty', () => {
+    expect(expectedAt(model, 'A>B', { day: 'mon-thu', hour: 14 })).toBeNull();
+  });
+
+  it('borrows the Friday timetable when only that one was published', () => {
+    expect(expectedAt(model, 'A>B', { day: 'fri', hour: 8 })).toBe(150);
   });
 
   it('has nothing for a segment the timetable never mentions', () => {

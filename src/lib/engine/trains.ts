@@ -40,6 +40,13 @@ export interface Train {
 }
 
 const UNKNOWN_VEHICLE = /^0*$/;
+
+/** TfL occasionally emits a half-filled prediction; one bad record must not skew a whole segment. */
+const usable = (p: Prediction): boolean =>
+  typeof p?.naptanId === 'string' &&
+  typeof p.vehicleId === 'string' &&
+  Number.isFinite(p.timeToStation) &&
+  p.timeToStation >= 0;
 /** Two predictions for one train land on the same point of the time axis, give or take jitter. */
 const CLUSTER_MINUTES = 0.75;
 
@@ -93,9 +100,10 @@ function toCalls(ordered: Prediction[], horizonSeconds: number): Call[] {
   const seen = new Set<string>();
   const calls: Call[] = [];
   for (const p of ordered) {
-    if (seen.has(p.naptanId) || p.timeToStation > horizonSeconds) continue;
+    const at = Date.parse(p.expectedArrival);
+    if (seen.has(p.naptanId) || p.timeToStation > horizonSeconds || !Number.isFinite(at)) continue;
     seen.add(p.naptanId);
-    calls.push({ stop: p.naptanId, eta: p.timeToStation, at: Date.parse(p.expectedArrival) });
+    calls.push({ stop: p.naptanId, eta: p.timeToStation, at });
   }
   return calls;
 }
@@ -132,9 +140,8 @@ function assemble(
           stationName
         );
 
-  const behind = from
-    ? model.layout[from]?.x
-    : place.x - Math.min(...approaches.map((s) => s.runTime / 60), 5);
+  const runIn = approaches.length ? Math.min(...approaches.map((s) => s.runTime / 60), 5) : 0;
+  const behind = from ? model.layout[from]?.x : place.x - runIn;
 
   return {
     id,
@@ -178,15 +185,14 @@ function inferTrains(
       const place = model.layout[prediction.naptanId];
       if (!place || !servesDirection(prediction, model)) continue;
       const key = prediction.destinationNaptanId ?? prediction.towards ?? '?';
-      groups.set(
-        key,
-        (groups.get(key) ?? []).concat({ x: place.x - prediction.timeToStation / 60, prediction })
-      );
+      const found = groups.get(key) ?? [];
+      found.push({ x: place.x - prediction.timeToStation / 60, prediction });
+      groups.set(key, found);
     }
 
     for (const [key, found] of groups) {
       let cluster: Prediction[] = [];
-      let last = -Infinity;
+      let start = -Infinity;
       const flush = () => {
         if (!cluster.length) return;
         const ordered = [...cluster].sort((a, b) => a.timeToStation - b.timeToStation);
@@ -196,10 +202,13 @@ function inferTrains(
         if (train) trains.push(train);
         cluster = [];
       };
+      // Measured from the cluster's first point, so near-misses cannot chain into one long train.
       for (const { x, prediction } of found.sort((a, b) => a.x - b.x)) {
-        if (x - last > CLUSTER_MINUTES) flush();
+        if (x - start > CLUSTER_MINUTES) {
+          flush();
+          start = x;
+        }
         cluster.push(prediction);
-        last = x;
       }
       flush();
     }
@@ -218,12 +227,15 @@ export function buildTrains(
   const anonymous: Prediction[] = [];
 
   for (const prediction of predictions) {
+    if (!usable(prediction)) continue;
     if (UNKNOWN_VEHICLE.test(prediction.vehicleId)) {
       anonymous.push(prediction);
       continue;
     }
     const key = `${prediction.lineId}|${prediction.vehicleId}`;
-    grouped.set(key, (grouped.get(key) ?? []).concat(prediction));
+    const found = grouped.get(key);
+    if (found) found.push(prediction);
+    else grouped.set(key, [prediction]);
   }
 
   const trains: Train[] = [];

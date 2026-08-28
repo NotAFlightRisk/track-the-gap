@@ -134,6 +134,7 @@
               {direction}
               colour={line.colour}
               selected={picked?.direction === direction.direction ? picked.key : null}
+              detailsId="detail-{direction.direction}"
               onselect={(key) => (picked = { direction: direction.direction, key })}
             />
             <p class="axis">
@@ -143,6 +144,7 @@
             </p>
           </div>
           <SegmentPanel
+            id="detail-{direction.direction}"
             segment={picked?.direction === direction.direction ? selected : null}
             label={selectedLabel}
             {meta}

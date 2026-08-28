@@ -55,14 +55,15 @@ const cleanRouteName = (name) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const DAY_TYPES = [
-  [/sunday/i, 'sun'],
-  [/saturday/i, 'sat'],
-  [/friday/i, 'fri'],
-  [/./, 'mon-thu']
-];
-
-const dayType = (name) => DAY_TYPES.find(([re]) => re.test(name))[1];
+// TfL names a schedule "Monday - Friday", "Monday - Thursday", "Friday", and so on, and one
+// schedule can cover more than one of our day types.
+function dayTypes(name) {
+  if (/sunday/i.test(name)) return ['sun'];
+  if (/saturday/i.test(name)) return ['sat'];
+  if (/mon\w*\s*(-|to)\s*fri/i.test(name)) return ['mon-thu', 'fri'];
+  if (/friday/i.test(name)) return ['fri'];
+  return ['mon-thu'];
+}
 
 function median(values) {
   if (!values.length) return null;
@@ -85,13 +86,14 @@ function departures(timetable, from) {
       route.stationIntervals.map((i) => [String(i.id), i.intervals.find((s) => s.stopId)?.stopId])
     );
     for (const schedule of route.schedules ?? []) {
-      const day = dayType(schedule.name);
       for (const journey of schedule.knownJourneys ?? []) {
         const to = nextStop.get(String(journey.intervalId));
         if (!to) continue;
-        const key = `${from}>${to}|${day}`;
-        if (!bySegment.has(key)) bySegment.set(key, []);
-        bySegment.get(key).push(Number(journey.hour) * 60 + Number(journey.minute));
+        for (const day of dayTypes(schedule.name)) {
+          const key = `${from}>${to}|${day}`;
+          if (!bySegment.has(key)) bySegment.set(key, []);
+          bySegment.get(key).push(Number(journey.hour) * 60 + Number(journey.minute));
+        }
       }
     }
   }

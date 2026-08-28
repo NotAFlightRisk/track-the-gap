@@ -46,15 +46,11 @@ export function measure(
   expected: number | null,
   config: HealthConfig = HEALTH
 ): Headway {
-  // Two predictions closer than the minimum headway are one move seen twice, so collapse them.
-  const distinct: number[] = [];
-  for (const at of [...arrivals].sort((a, b) => a - b)) {
-    const last = distinct.at(-1);
-    if (last === undefined || (at - last) / 1000 >= config.minHeadwaySeconds) distinct.push(at);
-  }
+  // One arrival per train arrives here already, so every gap is a real gap between two trains.
+  const sorted = arrivals.filter(Number.isFinite).sort((a, b) => a - b);
   const gaps: number[] = [];
-  for (let i = 1; i < distinct.length; i++) {
-    gaps.push(Math.round((distinct[i] - distinct[i - 1]) / 1000));
+  for (let i = 1; i < sorted.length; i++) {
+    gaps.push(Math.max(0, Math.round((sorted[i] - sorted[i - 1]) / 1000)));
   }
   if (!gaps.length) return { ...EMPTY, expected };
 
@@ -87,6 +83,8 @@ const LONDON = new Intl.DateTimeFormat('en-GB', {
   hour12: false
 });
 
+const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 const DAY_BY_WEEKDAY: Record<string, DayType> = {
   Mon: 'mon-thu',
   Tue: 'mon-thu',
@@ -102,27 +100,33 @@ export interface Clock {
   hour: number;
 }
 
-export function londonClock(at: number | Date = Date.now()): Clock {
+export function londonClock(at: number | Date = Date.now(), config: HealthConfig = HEALTH): Clock {
   const parts = LONDON.formatToParts(at);
   const weekday = parts.find((p) => p.type === 'weekday')?.value ?? 'Mon';
   const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? 0) % 24;
-  return { day: DAY_BY_WEEKDAY[weekday] ?? 'mon-thu', hour };
+  // The small hours still belong to the previous night's service, and so does its timetable.
+  const day = hour < config.serviceDayStartsAt ? WEEK[(WEEK.indexOf(weekday) + 6) % 7] : weekday;
+  return { day: DAY_BY_WEEKDAY[day] ?? 'mon-thu', hour };
 }
+
+/** Weekdays run near-identical timetables, so one stands in if TfL only published the other. */
+const STAND_IN: Partial<Record<DayType, DayType>> = { 'mon-thu': 'fri', fri: 'mon-thu' };
 
 /** Timetabled headway over one directed segment, borrowing a neighbouring hour if it has to. */
 export function expectedAt(
   model: DirectionModel,
   segment: string,
-  { day, hour }: Clock,
-  config: HealthConfig = HEALTH
+  { day, hour }: Clock
 ): number | null {
-  const hours = model.expected[segment]?.[day];
+  const timetable = model.expected[segment];
+  const hours = timetable?.[day] ?? timetable?.[STAND_IN[day] ?? day];
   if (!hours) return null;
   for (const offset of [0, -1, 1]) {
     const value = hours[(hour + offset + 24) % 24];
     if (value) return value;
   }
-  return config.fallbackHeadwaySeconds;
+  // Nothing timetabled around this hour means no service to compare against, not a default one.
+  return null;
 }
 
 /** Trains whose next-but-one move is exactly this segment, with when they reach its far end. */

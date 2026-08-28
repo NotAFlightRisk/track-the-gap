@@ -9,13 +9,14 @@
     segment: SegmentView | null;
     label: string;
     meta: Meta;
+    id: string;
   }
 
-  const { segment, label, meta }: Props = $props();
+  const { segment, label, meta, id }: Props = $props();
   const widest = $derived(Math.max(...(segment?.headway.gaps ?? [1]), 1));
 </script>
 
-<aside class="panel" aria-live="polite">
+<aside class="panel" {id} aria-label="Section detail">
   {#if !segment}
     <h3>Pick a section</h3>
     <p class="empty">
