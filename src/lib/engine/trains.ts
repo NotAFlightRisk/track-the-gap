@@ -166,11 +166,21 @@ function assemble(
   };
 }
 
-const servesDirection = (prediction: Prediction, model: DirectionModel): boolean => {
+const servesDirection = (
+  prediction: Prediction,
+  model: DirectionModel,
+  models: DirectionModel[]
+): boolean => {
   if (prediction.direction) return prediction.direction === model.direction;
   const here = model.layout[prediction.naptanId];
   const end = prediction.destinationNaptanId ? model.layout[prediction.destinationNaptanId] : null;
-  return Boolean(here && end && end.x > here.x);
+  if (!here || !end) return false;
+  // A train terminating where it is predicted is arriving, so take the one direction reaching it.
+  if (prediction.destinationNaptanId === prediction.naptanId) {
+    const arriving = models.filter((m) => m.segments.some((s) => s.to === prediction.naptanId));
+    return arriving.length === 1 && arriving[0] === model;
+  }
+  return end.x > here.x;
 };
 
 /**
@@ -188,7 +198,7 @@ function inferTrains(
     const groups = new Map<string, { x: number; prediction: Prediction }[]>();
     for (const prediction of predictions) {
       const place = model.layout[prediction.naptanId];
-      if (!place || !servesDirection(prediction, model)) continue;
+      if (!place || !servesDirection(prediction, model, models)) continue;
       const key = prediction.destinationNaptanId ?? prediction.towards ?? '?';
       const found = groups.get(key) ?? [];
       found.push({ x: place.x - prediction.timeToStation / 60, prediction });
@@ -209,7 +219,10 @@ function inferTrains(
       };
       // Measured from the cluster's first point, so near-misses cannot chain into one long train.
       for (const { x, prediction } of found.sort((a, b) => a.x - b.x)) {
-        if (x - start > CLUSTER_MINUTES) {
+        const where = prediction.currentLocation;
+        // A prediction reporting the same place as the open cluster is that train, not the next one.
+        const sameTrain = where && cluster.some((p) => p.currentLocation === where);
+        if (x - start > CLUSTER_MINUTES && !sameTrain) {
           flush();
           start = x;
         }
