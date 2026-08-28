@@ -1,11 +1,15 @@
+import adapterCloudflare from '@sveltejs/adapter-cloudflare';
 import adapterNode from '@sveltejs/adapter-node';
 import adapterVercel from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-const adapter =
-  process.env.ADAPTER === 'node' ? adapterNode() : adapterVercel({ runtime: 'nodejs22.x' });
+const adapters = {
+  node: () => adapterNode(),
+  vercel: () => adapterVercel({ runtime: 'nodejs22.x' }),
+  cloudflare: () => adapterCloudflare()
+};
 
 export default {
   preprocess: vitePreprocess(),
-  kit: { adapter }
+  kit: { adapter: (adapters[process.env.ADAPTER] ?? adapters.vercel)() }
 };

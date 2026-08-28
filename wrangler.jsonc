@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "track-the-gap",
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": ".svelte-kit/cloudflare", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "track-the-gap.peng.ly", "custom_domain": true }]
+}
