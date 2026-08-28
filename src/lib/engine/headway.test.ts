@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { byUnhappiness, classify, HEALTH, type HealthStatus } from '$lib/config/health';
 import type { DirectionModel, Segment } from '$lib/network/types';
-import { arrivalsOn, expectedAt, londonClock, measure } from './headway';
+import { arrivalsOn, expectedAt, gapIn, londonClock, measure, worstGapOf } from './headway';
 import type { Train } from './trains';
 
 const at = (...minutes: number[]) => minutes.map((m) => m * 60_000);
@@ -50,6 +50,42 @@ describe('measure', () => {
     expect(headway.observed).toBe(120);
     expect(headway.ratio).toBeNull();
     expect(headway.status).toBe('no-data');
+  });
+});
+
+describe('gapIn', () => {
+  it('offers nothing from a section running to its own timetable', () => {
+    expect(gapIn(measure(at(0, 15, 30), 900))).toBeNull();
+  });
+
+  it('offers nothing from a merely stretched headway', () => {
+    expect(gapIn(measure(at(0, 3, 6), 120))).toBeNull();
+  });
+
+  it('owns the gap once the classifier calls it one', () => {
+    expect(gapIn(measure(at(0, 2, 8), 120))).toEqual({ seconds: 360, ratio: 3 });
+  });
+
+  it('still owns it when spacing has broken down altogether', () => {
+    expect(gapIn(measure(at(0, 0.8, 9, 9.8, 18), 180))).not.toBeNull();
+  });
+});
+
+describe('worstGapOf', () => {
+  const branch = { seconds: 1800, ratio: 2, name: 'Mill Hill East branch' };
+  const trunk = { seconds: 600, ratio: 5, name: 'Camden trunk' };
+
+  it('has no worst gap to name when nothing is gapped', () => {
+    expect(worstGapOf([])).toBeNull();
+  });
+
+  it("picks the frequent trunk's gap over the quiet branch's longer wait", () => {
+    expect(worstGapOf([branch, trunk])).toBe(trunk);
+    expect(worstGapOf([trunk, branch])).toBe(trunk);
+  });
+
+  it('leaves the branch as the worst when nothing else is gapped', () => {
+    expect(worstGapOf([branch])).toBe(branch);
   });
 });
 

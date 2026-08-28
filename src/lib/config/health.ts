@@ -62,6 +62,9 @@ export function classify(
   return 'normal';
 }
 
+/** Both readings mean at least one headway ran materially past its own timetable. */
+export const isGap = (status: HealthStatus): boolean => status === 'gap' || status === 'severe';
+
 /** Worst first, so a line can inherit the state of its unhappiest segment. */
 export const STATUS_RANK: Record<HealthStatus, number> = {
   severe: 5,

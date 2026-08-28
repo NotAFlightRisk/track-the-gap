@@ -12,7 +12,7 @@ export interface OfficialStatus {
 
 export interface Gap {
   seconds: number;
-  ratio: number | null;
+  ratio: number;
   from: string;
   to: string;
   direction: Direction;
