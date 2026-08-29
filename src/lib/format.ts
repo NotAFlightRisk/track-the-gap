@@ -1,4 +1,4 @@
-import type { LineSummary } from './types';
+import type { HealthStatus, LineSummary, StatusCounts } from './types';
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
@@ -55,3 +55,24 @@ export function stripLabel({ name, spark, trains, sparkTowards, observed, expect
     : 'No trains running';
   return `Train spacing on the ${name} line. ${drawn}. Across the line, ${spoken(observed, expected)}.`;
 }
+
+/** "1 train", "2 trains". */
+export const plural = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
+/** The sentence under the health pill, explaining the verdict it was handed. */
+export function verdictBasis(status: HealthStatus, counts: StatusCounts): string {
+  const all = Object.values(counts).reduce((total, n) => total + n, 0);
+  const measured = all - counts['no-data'];
+  const read = `${measured} of this line’s ${all} sections`;
+  if (status !== 'no-data')
+    return `We can measure ${read} right now, and this is the level more than a quarter of them reach.`;
+  return measured
+    ? `Only ${read} can be measured right now, too few to call the line either way.`
+    : `None of this line’s ${all} sections can be measured yet.`;
+}
+
+/** The sentence over the gaps table. */
+export const gapsBlurb = (rows: number): string =>
+  rows
+    ? `Worst first: the ${plural(rows, 'section')} with the biggest gap against timetable right now.`
+    : 'No section has two predictions to measure a gap from yet.';
