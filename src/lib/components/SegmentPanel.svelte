@@ -16,7 +16,7 @@
   const widest = $derived(Math.max(...(segment?.headway.gaps ?? [1]), 1));
 </script>
 
-<aside class="panel" {id} aria-label="Section detail">
+<aside class="panel" {id} aria-label="Section detail, {label}">
   {#if !segment}
     <h3>Pick a section</h3>
     <p class="empty">

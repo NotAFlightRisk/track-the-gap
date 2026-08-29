@@ -33,10 +33,6 @@
       ?.segments.find((s) => s.key === picked?.key) ?? null
   );
 
-  const selectedLabel = $derived(
-    line.directions.find((d) => d.direction === picked?.direction)?.label ?? ''
-  );
-
   const worst = $derived(
     line.directions
       .flatMap((d) => d.segments.map((segment) => ({ segment, label: d.label })))
@@ -142,7 +138,7 @@
           <SegmentPanel
             id="detail-{direction.direction}"
             segment={picked?.direction === direction.direction ? selected : null}
-            label={selectedLabel}
+            label={direction.label}
             {meta}
           />
         </div>
