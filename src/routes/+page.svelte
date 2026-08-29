@@ -60,18 +60,18 @@
     <fieldset>
       <legend class="visually-hidden">Sort the board</legend>
       <label>
-        <input type="radio" bind:group={order} value="health" />
+        <input type="radio" name="order" bind:group={order} value="health" />
         Worst first
       </label>
       <label>
-        <input type="radio" bind:group={order} value="name" />
+        <input type="radio" name="order" bind:group={order} value="name" />
         A to Z
       </label>
     </fieldset>
   </div>
 </div>
 
-<div class="board" aria-labelledby="board">
+<section class="board" aria-labelledby="board">
   <div class="shell">
     <div class="head" aria-hidden="true">
       <span>Line</span>
@@ -84,7 +84,7 @@
       <LineRow {line} />
     {/each}
   </div>
-</div>
+</section>
 
 <div class="shell">
   <section class="explain">
