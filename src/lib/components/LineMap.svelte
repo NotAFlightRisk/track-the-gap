@@ -17,10 +17,20 @@
   const ROW_HEIGHT = 132;
   const TOP = 54;
   const SIDE = 28;
+  const LABEL_GAP = 7;
+  const MAX_CHAR_WIDTH = 6.2;
+  const LABEL_SLACK = 28;
 
-  const width = $derived(direction.span * PX_PER_MIN + SIDE * 2);
+  /** Upper bound on how far left of its own station a name reaches, turned through 45 degrees. */
+  const labelReach = (name: string) =>
+    LABEL_GAP + (name.length * MAX_CHAR_WIDTH + LABEL_SLACK) * Math.SQRT1_2;
+
+  const left = $derived(
+    Math.max(SIDE, ...direction.stations.map((s) => labelReach(s.name) - s.x * PX_PER_MIN))
+  );
+  const width = $derived(left + direction.span * PX_PER_MIN + SIDE);
   const height = $derived(TOP + direction.rows * ROW_HEIGHT);
-  const at = (x: number) => SIDE + x * PX_PER_MIN;
+  const at = (x: number) => left + x * PX_PER_MIN;
   const lane = (row: number) => TOP + row * ROW_HEIGHT;
 
   const ticks = $derived(
@@ -106,9 +116,9 @@
           y2={lane(station.row) + 9}
         />
         <text
-          x={at(station.x) - 7}
+          x={at(station.x) - LABEL_GAP}
           y={lane(station.row) + 16}
-          transform="rotate(-45, {at(station.x) - 7}, {lane(station.row) + 16})"
+          transform="rotate(-45, {at(station.x) - LABEL_GAP}, {lane(station.row) + 16})"
         >
           {station.name}
         </text>
