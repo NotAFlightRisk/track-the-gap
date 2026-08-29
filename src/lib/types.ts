@@ -97,6 +97,7 @@ export interface LineSummary {
   /** Train positions on the busiest direction, 0-1 across the line, for the summary strip. */
   spark: { x: number; row: number }[];
   sparkRows: number;
+  sparkTowards: string;
 }
 
 export interface LineView extends LineSummary {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { headway, spoken } from '$lib/format';
+  import { headway, stripLabel } from '$lib/format';
   import type { LineSummary } from '$lib/types';
   import GapStrip from './GapStrip.svelte';
   import OfficialStatus from './OfficialStatus.svelte';
@@ -7,9 +7,7 @@
 
   const { line }: { line: LineSummary } = $props();
 
-  const strip = $derived(
-    `Train spacing on the ${line.name} line: ${line.trains} running, ${spoken(line.observed, line.expected)}`
-  );
+  const strip = $derived(stripLabel(line));
 </script>
 
 <article class="row" style:--line={line.colour} style:--ink={line.ink}>

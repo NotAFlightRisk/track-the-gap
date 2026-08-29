@@ -1,3 +1,5 @@
+import type { LineSummary } from './types';
+
 const pad = (value: number) => String(value).padStart(2, '0');
 
 /** Headways read as minutes and seconds off a departure board. */
@@ -37,4 +39,19 @@ export function spoken(observed: number | null, expected: number | null): string
   if (observed === null) return 'no headway measured';
   const said = `${headway(observed)} between trains`;
   return expected ? `${said}, against ${headway(expected)} expected` : said;
+}
+
+type StripLine = Pick<
+  LineSummary,
+  'name' | 'spark' | 'trains' | 'sparkTowards' | 'observed' | 'expected'
+>;
+
+/** What the summary strip actually draws: one direction's trains, not the whole line's. */
+export function stripLabel({ name, spark, trains, sparkTowards, observed, expected }: StripLine) {
+  const some =
+    spark.length === trains ? `the line’s ${trains}` : `${spark.length} of the line’s ${trains}`;
+  const drawn = trains
+    ? `${sparkTowards}: ${some} train${trains === 1 ? '' : 's'}`
+    : 'No trains running';
+  return `Train spacing on the ${name} line. ${drawn}. Across the line, ${spoken(observed, expected)}.`;
 }
