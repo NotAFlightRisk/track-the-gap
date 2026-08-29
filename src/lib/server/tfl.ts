@@ -74,23 +74,20 @@ async function fetchLive(previous: LiveData | null): Promise<LiveData> {
     get<unknown>('/Line/Mode/tube/Status')
   ]);
 
-  const predictions =
-    arrivals.status === 'fulfilled' && Array.isArray(arrivals.value)
-      ? (arrivals.value as Prediction[])
-      : previous?.predictions;
-  if (!predictions)
-    throw arrivals.status === 'rejected' ? arrivals.reason : new Error('No arrivals');
+  const arrived = arrivals.status === 'fulfilled' && Array.isArray(arrivals.value);
+  // Predictions carry the time they were read, so a reused set never looks freshly fetched.
+  const read = arrived
+    ? { at: Date.now(), predictions: arrivals.value as Prediction[] }
+    : previous && { at: previous.fetchedAt, predictions: previous.predictions };
+  if (!read) throw arrivals.status === 'rejected' ? arrivals.reason : new Error('No arrivals');
 
-  const statuses =
-    status.status === 'fulfilled' ? readStatuses(status.value) : (previous?.statuses ?? []);
-  const failed = [
-    arrivals.status === 'rejected' && 'arrivals',
-    status.status === 'rejected' && 'line status'
-  ].filter(Boolean);
+  const told = status.status === 'fulfilled' && Array.isArray(status.value);
+  const statuses = told ? readStatuses(status.value) : (previous?.statuses ?? []);
+  const failed = [!arrived && 'arrivals', !told && 'line status'].filter(Boolean);
 
   return {
-    fetchedAt: Date.now(),
-    predictions,
+    fetchedAt: read.at,
+    predictions: read.predictions,
     statuses,
     stale: failed.length > 0,
     error: failed.length ? `TfL ${failed.join(' and ')} unavailable` : null

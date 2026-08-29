@@ -285,13 +285,12 @@ function build(data: LiveData): { lines: LineView[]; meta: Meta } {
   };
 }
 
-let cached: { at: number; lines: LineView[]; meta: Meta } | null = null;
+let cached: { source: LiveData; lines: LineView[]; meta: Meta } | null = null;
 
 async function snapshot() {
   const data = await live();
-  if (!cached || cached.at !== data.fetchedAt || cached.meta.stale !== data.stale) {
-    cached = { at: data.fetchedAt, ...build(data) };
-  }
+  // A reading is only ever handed back as itself, so anything new to build is a new object.
+  if (cached?.source !== data) cached = { source: data, ...build(data) };
   return cached;
 }
 
