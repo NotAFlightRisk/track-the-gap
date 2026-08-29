@@ -29,7 +29,7 @@ export function createLive<T>(source: () => Source<T>) {
       const tick = async () => {
         if (document.hidden) return;
         try {
-          const res = await fetch(url, { signal: controller.signal });
+          const res = await fetch(url, { cache: 'no-cache', signal: controller.signal });
           if (!res.ok) throw new Error(String(res.status));
           held = { url, value: (await res.json()) as T };
           failures = 0;
