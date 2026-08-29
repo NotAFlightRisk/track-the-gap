@@ -229,7 +229,8 @@ function buildLine(
       busiest?.trains
         .slice(0, SPARK_TRAINS)
         .map((t) => ({ x: Math.round((t.x / busiest.span) * 1000) / 1000, row: t.row })) ?? [],
-    sparkRows: busiest?.rows ?? 1
+    sparkRows: busiest?.rows ?? 1,
+    sparkTowards: busiest?.label ?? ''
   };
 }
 
