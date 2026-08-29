@@ -6,7 +6,7 @@
   import OfficialStatus from '$lib/components/OfficialStatus.svelte';
   import SegmentPanel from '$lib/components/SegmentPanel.svelte';
   import StatusPill from '$lib/components/StatusPill.svelte';
-  import { headway, ratio } from '$lib/format';
+  import { gapsBlurb, headway, plural, ratio, verdictBasis } from '$lib/format';
   import { jsonLd, lineDescription, lineTitle, SITE } from '$lib/meta';
   import { createLive } from '$lib/state/live.svelte';
   import type { LinePayload } from '$lib/types';
@@ -82,11 +82,7 @@
         <div>
           <h2>We say</h2>
           <StatusPill status={line.status} />
-          <p class="hint">
-            The level reached by the unhappiest quarter of this line's {Object.values(
-              line.counts
-            ).reduce((a, b) => a + b, 0)} sections.
-          </p>
+          <p class="hint">{verdictBasis(line.status, line.counts)}</p>
         </div>
       </div>
 
@@ -117,7 +113,7 @@
         <header>
           <h2>{direction.label}</h2>
           <p>
-            {direction.trains.length} trains ·
+            {plural(direction.trains.length, 'train')} ·
             <span class="numeric">{headway(direction.headway.observed)}</span> between them,
             timetable <span class="numeric">{headway(direction.headway.expected)}</span>
             {#if direction.worstGap}
@@ -155,33 +151,35 @@
 
     <section class="table">
       <h2>Where the gaps are</h2>
-      <p>The twelve sections furthest from their timetabled headway right now.</p>
-      <div class="scroller">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Section</th>
-              <th scope="col">Direction</th>
-              <th scope="col">Reading</th>
-              <th scope="col">Now</th>
-              <th scope="col">Timetable</th>
-              <th scope="col">Largest gap</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each worst as { segment, label } (label + segment.key)}
+      <p>{gapsBlurb(worst.length)}</p>
+      {#if worst.length}
+        <div class="scroller">
+          <table>
+            <thead>
               <tr>
-                <th scope="row">{segment.fromName} → {segment.toName}</th>
-                <td>{label}</td>
-                <td><StatusPill status={segment.headway.status} short title={false} /></td>
-                <td class="numeric">{headway(segment.headway.observed)}</td>
-                <td class="numeric">{headway(segment.headway.expected)}</td>
-                <td class="numeric">{headway(segment.headway.worst)}</td>
+                <th scope="col">Section</th>
+                <th scope="col">Direction</th>
+                <th scope="col">Reading</th>
+                <th scope="col">Now</th>
+                <th scope="col">Timetable</th>
+                <th scope="col">Largest gap</th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {#each worst as { segment, label } (label + segment.key)}
+                <tr>
+                  <th scope="row">{segment.fromName} → {segment.toName}</th>
+                  <td>{label}</td>
+                  <td><StatusPill status={segment.headway.status} short title={false} /></td>
+                  <td class="numeric">{headway(segment.headway.observed)}</td>
+                  <td class="numeric">{headway(segment.headway.expected)}</td>
+                  <td class="numeric">{headway(segment.headway.worst)}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
     </section>
 
     <section class="explain">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { stripLabel } from './format';
+import { gapsBlurb, plural, stripLabel, verdictBasis } from './format';
 
 const line = (over = {}) => ({
   name: 'Central',
@@ -48,5 +48,70 @@ describe('stripLabel', () => {
     expect(stripLabel(line({ trains: 0, spark: [], observed: null, expected: null }))).toBe(
       'Train spacing on the Central line. No trains running. Across the line, no headway measured.'
     );
+  });
+});
+
+const counts = (over = {}) => ({
+  normal: 0,
+  degraded: 0,
+  gap: 0,
+  bunching: 0,
+  severe: 0,
+  'no-data': 0,
+  ...over
+});
+
+describe('plural', () => {
+  it('keeps one of a thing singular', () => {
+    expect(plural(1, 'train')).toBe('1 train');
+  });
+
+  it('pluralises everything else, none included', () => {
+    expect(plural(0, 'train')).toBe('0 trains');
+    expect(plural(2, 'train')).toBe('2 trains');
+  });
+});
+
+describe('verdictBasis', () => {
+  it('counts the sections the verdict was taken over, not every section on the line', () => {
+    expect(verdictBasis('normal', counts({ normal: 29, gap: 8, 'no-data': 69 }))).toBe(
+      'We can measure 37 of this line’s 106 sections right now, and this is the level more than ' +
+        'a quarter of them reach.'
+    );
+  });
+
+  it('says nothing was measured rather than claiming a quarter of nothing', () => {
+    expect(verdictBasis('no-data', counts({ 'no-data': 70 }))).toBe(
+      'None of this line’s 70 sections can be measured yet.'
+    );
+  });
+
+  it('blames thin coverage when some sections read but the line still cannot be called', () => {
+    expect(verdictBasis('no-data', counts({ normal: 5, 'no-data': 113 }))).toBe(
+      'Only 5 of this line’s 118 sections can be measured right now, too few to call the line ' +
+        'either way.'
+    );
+  });
+
+  it('holds up on a two-section line, where a quarter is one section', () => {
+    expect(verdictBasis('normal', counts({ normal: 1, 'no-data': 1 }))).toBe(
+      'We can measure 1 of this line’s 2 sections right now, and this is the level more than a ' +
+        'quarter of them reach.'
+    );
+  });
+});
+
+describe('gapsBlurb', () => {
+  it('promises only the rows the table is about to draw', () => {
+    expect(gapsBlurb(12)).toBe(
+      'Worst first: the 12 sections with the biggest gap against timetable right now.'
+    );
+    expect(gapsBlurb(1)).toBe(
+      'Worst first: the 1 section with the biggest gap against timetable right now.'
+    );
+  });
+
+  it('says so plainly when there is nothing to rank', () => {
+    expect(gapsBlurb(0)).toBe('No section has two predictions to measure a gap from yet.');
   });
 });
