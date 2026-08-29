@@ -15,7 +15,7 @@
   const late = $derived(meta.stale || age > meta.pollSeconds * 4000);
 </script>
 
-<p class="freshness" class:late aria-live="polite">
+<p class="freshness" class:late>
   <span class="dot" aria-hidden="true"></span>
   {#if late}
     Data is {ago(age)} and TfL is not answering
@@ -23,6 +23,9 @@
     Updated {ago(age)}, {clock(meta.fetchedAt)}
   {/if}
 </p>
+<span class="visually-hidden" role="status">
+  {late ? 'Live updates have stalled.' : 'Live updates are running.'}
+</span>
 
 <style>
   .freshness {
