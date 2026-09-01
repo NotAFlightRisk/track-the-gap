@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Rebuilds src/lib/data/network.json from the TfL API. Run it when the network changes.
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lostDayTypes } from './coverage.mjs';
 
 const LINES = [
   'bakerloo',
@@ -240,6 +241,10 @@ async function main() {
   const stations = {};
   const lines = [];
   await mkdir(dirname(OUT), { recursive: true });
+  const previous = await readFile(OUT, 'utf8').then(
+    (text) => JSON.parse(text).lines,
+    () => []
+  );
 
   for (const lineId of LINES) {
     console.log(lineId);
@@ -251,6 +256,9 @@ async function main() {
     if (directions.length) lines.push({ id: lineId, directions });
     await writeFile(OUT, JSON.stringify({ generated: new Date().toISOString(), stations, lines }));
   }
+
+  const lost = lostDayTypes(previous, lines);
+  if (lost.length) throw new Error(`Timetabled days went missing: ${lost.join('; ')}`);
 
   console.log(
     `\n${lines.length} lines, ${Object.keys(stations).length} stations, ${calls} API calls`
