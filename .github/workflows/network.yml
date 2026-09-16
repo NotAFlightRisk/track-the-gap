@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'NotAFlightRisk'
     permissions:
+      actions: write
       contents: write
       pull-requests: write
     steps:
@@ -48,4 +49,6 @@ jobs:
           git push -u origin "$branch"
           gh pr create --fill --title "chore(data): refresh the network model" \
             --body "Topology, run times and timetabled headways, straight off the TfL API."
+          # a PR opened with github.token never triggers CI, so kick it off by hand
+          gh workflow run ci.yml --ref "$branch"
           echo "Opened a pull request from \`$branch\`" >> "$GITHUB_STEP_SUMMARY"
