@@ -28,6 +28,18 @@ const fetching = async (responder: (url: URL) => Promise<unknown>) => {
   return mock;
 };
 
+const tflDown = () => Promise.reject(new Error('TfL is having a moment'));
+
+const colo = () => {
+  const stored = new Map<string, string>();
+  vi.stubGlobal('caches', {
+    default: {
+      match: async (key: string) => stored.has(key) && new Response(stored.get(key)),
+      put: async (key: string, res: Response) => void stored.set(key, await res.text())
+    }
+  });
+};
+
 describe('live', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -119,5 +131,28 @@ describe('live', () => {
     expect(half.stale).toBe(true);
     expect(half.error).toContain('line status');
     expect(half.fetchedAt).toBe(LATER.getTime());
+  });
+
+  it('falls back to the last reading another isolate shelved when TfL is down', async () => {
+    colo();
+    await fetching(answering);
+    const fresh = await (await import('./tfl')).live();
+
+    vi.resetModules();
+    vi.setSystemTime(LATER);
+    await fetching(tflDown);
+    const cold = await (await import('./tfl')).live();
+
+    expect(cold.predictions).toEqual(fresh.predictions);
+    expect(cold.fetchedAt).toBe(fresh.fetchedAt);
+    expect(cold.stale).toBe(true);
+  });
+
+  it('still throws on a cold isolate with nothing shelved', async () => {
+    colo();
+    await fetching(tflDown);
+    const { live } = await import('./tfl');
+
+    await expect(live()).rejects.toThrow('TfL is having a moment');
   });
 });

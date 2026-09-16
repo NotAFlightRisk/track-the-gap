@@ -3,7 +3,10 @@ import { LINE_IDS } from '$lib/config/lines';
 
 const BASE = 'https://api.tfl.gov.uk';
 const TTL = Math.max(5, Number(env.TFL_POLL_SECONDS ?? 15)) * 1000;
-const TIMEOUT = 12_000;
+const TIMEOUT = 6_000;
+// isolates barely outlive a visit, so the colo cache holds a reading for the next one
+const SHELF = 'https://track-the-gap.internal/live';
+const SHELF_SECONDS = 600;
 
 export interface Prediction {
   vehicleId: string;
@@ -94,17 +97,39 @@ async function fetchLive(previous: LiveData | null): Promise<LiveData> {
   };
 }
 
+const shelf = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
+
+// the shelf is a nice-to-have, so a cache hiccup never costs a live reading
+async function fromShelf(): Promise<LiveData | null> {
+  const hit = await shelf()
+    ?.match(SHELF)
+    .catch(() => undefined);
+  return hit ? hit.json().catch(() => null) : null;
+}
+
+const toShelf = (data: LiveData) =>
+  shelf()
+    ?.put(
+      SHELF,
+      new Response(JSON.stringify(data), {
+        headers: { 'cache-control': `max-age=${SHELF_SECONDS}` }
+      })
+    )
+    .catch(() => undefined);
+
 let current: LiveData | null = null;
 let inflight: Promise<LiveData> | null = null;
 let nextAttempt = 0;
 
 /** One shared snapshot per TTL, so traffic never multiplies calls to TfL. */
 export async function live(): Promise<LiveData> {
+  current ??= await fromShelf();
   const now = Date.now();
   if (current && (now - current.fetchedAt < TTL || now < nextAttempt)) return current;
   inflight ??= fetchLive(current)
-    .then((data) => {
+    .then(async (data) => {
       nextAttempt = data.stale ? Date.now() + TTL * 4 : 0;
+      if (!data.stale) await toShelf(data);
       return (current = data);
     })
     .catch((err: Error) => {
