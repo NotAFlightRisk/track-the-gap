@@ -29,7 +29,7 @@
     "svelte": "^5.57.0",
     "svelte-check": "^4.6.0",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2",
+    "vite": "^8.3.0",
     "vitest": "^5.0.0"
   },
   "description": "Live London Underground headways, service gaps and train bunching",
