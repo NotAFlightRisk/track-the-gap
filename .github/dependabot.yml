@@ -46,6 +46,9 @@ updates:
           - 'prettier-*'
           - 'typescript'
           - '@types/*'
+        update-types:
+          - 'minor'
+          - 'patch'
       everything-else:
         patterns:
           - '*'
