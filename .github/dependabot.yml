@@ -1,6 +1,3 @@
-# Keeps dependencies patched. Trim the ecosystems to match the project.
-# Docs: https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
-
 version: 2
 
 updates:
@@ -14,29 +11,47 @@ updates:
     commit-message:
       prefix: 'chore'
       include: 'scope'
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns:
+          - '*'
 
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
     labels:
       - 'dependencies'
       - 'javascript'
     commit-message:
       prefix: 'chore'
       include: 'scope'
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     groups:
-      # One PR for the routine bumps, rather than fifteen
-      minor-and-patch:
-        update-types:
-          - 'minor'
-          - 'patch'
       svelte:
         patterns:
           - 'svelte'
+          - 'svelte-*'
           - '@sveltejs/*'
           - 'vite'
+          - 'vitest'
+          - '@vitest/*'
+      tooling:
+        patterns:
+          - 'prettier'
+          - 'prettier-*'
+          - 'typescript'
+          - '@types/*'
+      everything-else:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
 
   - package-ecosystem: 'docker'
     directory: '/'
@@ -48,3 +63,9 @@ updates:
     commit-message:
       prefix: 'chore'
       include: 'scope'
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns:
+          - '*'
