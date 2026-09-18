@@ -23,14 +23,14 @@
     "@sveltejs/adapter-vercel": "^6.0.2",
     "@sveltejs/kit": "^2.70.3",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
-    "@types/node": "^26.5.0",
+    "@types/node": "^26.5.1",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
     "svelte": "^5.57.0",
     "svelte-check": "^4.6.0",
     "typescript": "^6.0.3",
-    "vite": "^8.2.2",
-    "vitest": "^5.0.0"
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   },
   "description": "Live London Underground headways, service gaps and train bunching",
   "license": "MIT",
