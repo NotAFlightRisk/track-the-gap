@@ -17,6 +17,9 @@ updates:
       actions:
         patterns:
           - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
 
   - package-ecosystem: 'npm'
     directory: '/'
@@ -72,3 +75,6 @@ updates:
       docker:
         patterns:
           - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
