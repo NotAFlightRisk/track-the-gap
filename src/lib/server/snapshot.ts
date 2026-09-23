@@ -200,7 +200,7 @@ function buildLine(
   );
 
   const sections = directions.flatMap((d) => d.segments.map((s) => s.headway.status));
-  const { observed, expected, ratio } = rollupHeadway(
+  const { observed, expected, ratio, excessWait } = rollupHeadway(
     directions.map((d) => d.headway),
     sections
   );
@@ -222,6 +222,7 @@ function buildLine(
     observed,
     expected,
     ratio,
+    excessWait,
     worstGap,
     trains: trains.length,
     counts,

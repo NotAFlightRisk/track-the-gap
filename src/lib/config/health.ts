@@ -78,13 +78,15 @@ export const STATUS_RANK: Record<HealthStatus, number> = {
   'no-data': 0
 };
 
-/** Worst reading first, then furthest from its own timetable, then alphabetical. */
+/** Worst reading first, then whichever adds most to the wait, then alphabetical. */
 export const byUnhappiness = (
-  a: { status: HealthStatus; ratio: number | null; name: string },
-  b: { status: HealthStatus; ratio: number | null; name: string }
+  a: { status: HealthStatus; excessWait: number | null; name: string },
+  b: { status: HealthStatus; excessWait: number | null; name: string }
 ): number =>
   STATUS_RANK[b.status] - STATUS_RANK[a.status] ||
-  (b.ratio ?? 0) - (a.ratio ?? 0) ||
+  // Nothing measured sorts below a line measurably early, rather than in among them.
+  (a.excessWait === null ? 1 : 0) - (b.excessWait === null ? 1 : 0) ||
+  (b.excessWait ?? 0) - (a.excessWait ?? 0) ||
   a.name.localeCompare(b.name);
 
 /** Enough of a set can be measured for the set to say anything about itself. */

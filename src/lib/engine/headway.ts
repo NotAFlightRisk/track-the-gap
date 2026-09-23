@@ -17,6 +17,8 @@ export interface Headway {
   ratio: number | null;
   worstRatio: number | null;
   variation: number | null;
+  /** Seconds of wait on top of the timetable's own, the way TfL publishes it. */
+  excessWait: number | null;
   samples: number;
   status: HealthStatus;
 }
@@ -29,6 +31,7 @@ export const EMPTY: Headway = {
   ratio: null,
   worstRatio: null,
   variation: null,
+  excessWait: null,
   samples: 0,
   status: 'no-data'
 };
@@ -72,7 +75,25 @@ export function rollupHeadway(
   const observed = medianOf(read.map((part) => part.observed));
   const expected = medianOf(read.map((part) => part.expected));
   if (observed === null) return EMPTY;
-  return { ...EMPTY, observed, expected, ratio: observed && expected ? observed / expected : null };
+  return {
+    ...EMPTY,
+    observed,
+    expected,
+    ratio: observed && expected ? observed / expected : null,
+    excessWait: medianOf(read.map((part) => part.excessWait))
+  };
+}
+
+/** More passengers turn up in a long gap than a short one, so gaps count by their own length. */
+const meanWait = (gaps: number[]): number | null => {
+  const total = gaps.reduce((a, b) => a + b, 0);
+  return total ? gaps.reduce((a, b) => a + b * b, 0) / (2 * total) : null;
+};
+
+/** Excess wait time: how much longer the average wait runs than the timetable asks for. */
+export function excessWaitOf(gaps: number[], expected: number | null): number | null {
+  const wait = meanWait(gaps);
+  return wait !== null && expected ? wait - expected / 2 : null;
 }
 
 function coefficientOfVariation(values: number[]): number | null {
@@ -111,6 +132,7 @@ export function measure(
     ratio,
     worstRatio,
     variation,
+    excessWait: excessWaitOf(gaps, expected),
     samples: gaps.length,
     status: classify(
       { ratio, worstRatio, variation, samples: gaps.length, excess: expected && worst - expected },

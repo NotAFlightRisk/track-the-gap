@@ -21,9 +21,12 @@ export function ago(milliseconds: number): string {
   return `${Math.round(seconds / 60)} min ago`;
 }
 
-export function ratio(value: number | null | undefined): string {
-  if (value === null || value === undefined) return '–';
-  return `${value.toFixed(2)}×`;
+/** Excess wait time the way TfL publishes it: signed minutes on top of the timetable's own. */
+export function excess(seconds: number | null | undefined): string {
+  if (seconds === null || seconds === undefined) return '–';
+  const minutes = Math.round(seconds / 6) / 10;
+  const sign = minutes > 0 ? '+' : minutes < 0 ? '−' : '';
+  return `${sign}${Math.abs(minutes).toFixed(1)} min`;
 }
 
 export const clock = (at: number): string =>

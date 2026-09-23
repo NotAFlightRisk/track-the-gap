@@ -91,6 +91,7 @@ export interface LineSummary {
   observed: number | null;
   expected: number | null;
   ratio: number | null;
+  excessWait: number | null;
   worstGap: Gap | null;
   trains: number;
   counts: StatusCounts;
