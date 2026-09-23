@@ -12,6 +12,7 @@ import {
   expectedAt,
   gapIn,
   londonClock,
+  excessWaitOf,
   measure,
   rollupHeadway,
   worstGapOf
@@ -199,19 +200,68 @@ describe('arrivalsOn', () => {
 });
 
 describe('byUnhappiness', () => {
-  const line = (name: string, status: HealthStatus, ratio: number | null) => ({
+  const line = (name: string, status: HealthStatus, excessWait: number | null) => ({
     name,
     status,
-    ratio
+    excessWait
   });
 
-  it('puts the worst reading first, then the one furthest from its timetable', () => {
+  it('puts the worst reading first, then the one adding most to the wait', () => {
     const board = [
-      line('Circle', 'normal', 1.05),
-      line('Bakerloo', 'gap', 1.1),
-      line('Metropolitan', 'gap', 2.2)
+      line('Circle', 'normal', 20),
+      line('Bakerloo', 'gap', 45),
+      line('Metropolitan', 'gap', 130)
     ].sort(byUnhappiness);
     expect(board.map((l) => l.name)).toEqual(['Metropolitan', 'Bakerloo', 'Circle']);
+  });
+
+  it('drops a line it cannot measure below one that is running early', () => {
+    const board = [
+      line('Unknown', 'normal', null),
+      line('Circle', 'normal', -30),
+      line('Victoria', 'normal', 20)
+    ].sort(byUnhappiness);
+    expect(board.map((l) => l.name)).toEqual(['Victoria', 'Circle', 'Unknown']);
+  });
+
+  it('separates two lines the typical headway cannot tell apart', () => {
+    const even = measure(at(0, 4, 8, 12, 16), 240);
+    const lumpy = measure(at(0, 4, 8, 12, 18), 240);
+    // Same reading, same median against the same timetable. Only the wait they cost differs.
+    expect([even.status, even.ratio]).toEqual([lumpy.status, lumpy.ratio]);
+    expect(lumpy.excessWait).toBeGreaterThan(even.excessWait!);
+    expect(
+      [
+        { name: 'Even', status: even.status, excessWait: even.excessWait },
+        { name: 'Lumpy', status: lumpy.status, excessWait: lumpy.excessWait }
+      ].sort(byUnhappiness)[0].name
+    ).toBe('Lumpy');
+  });
+});
+
+describe('excessWaitOf', () => {
+  it('reads nothing on top of the timetable when the service is even', () => {
+    expect(excessWaitOf([120, 120, 120], 120)).toBe(0);
+  });
+
+  it('counts a long gap by its own length, because more people wait through it', () => {
+    // Twelve minutes of service as 2+2+8 leaves a mean wait of 3 minutes, not 2.
+    expect(excessWaitOf([120, 120, 480], 240)).toBe(60);
+  });
+
+  it('goes negative when trains run closer together than the timetable asks', () => {
+    expect(excessWaitOf([60, 60], 120)).toBe(-30);
+  });
+
+  it('holds still as a section gets more predictions, where the largest gap cannot', () => {
+    const short = measure(at(0, 2, 4, 6), 120);
+    const long = measure(at(0, 2, 4, 6, 8, 10, 12, 14, 16, 18), 120);
+    expect(short.excessWait).toBe(long.excessWait);
+  });
+
+  it('has no view without a timetable to be excess of', () => {
+    expect(excessWaitOf([120, 120], null)).toBeNull();
+    expect(excessWaitOf([], 120)).toBeNull();
   });
 });
 
@@ -225,6 +275,7 @@ describe('rollupHeadway', () => {
     expect(rolled.observed).toBe(360);
     expect(rolled.expected).toBe(240);
     expect(rolled.ratio).toBe(1.5);
+    expect(rolled.excessWait).toBe(60);
   });
 
   it('names no wait for a line it has just called unjudgeable', () => {

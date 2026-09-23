@@ -6,7 +6,7 @@
   import OfficialStatus from '$lib/components/OfficialStatus.svelte';
   import SegmentPanel from '$lib/components/SegmentPanel.svelte';
   import StatusPill from '$lib/components/StatusPill.svelte';
-  import { gapsBlurb, headway, plural, ratio, verdictBasis } from '$lib/format';
+  import { excess, gapsBlurb, headway, plural, verdictBasis } from '$lib/format';
   import { jsonLd, lineDescription, lineTitle, SITE } from '$lib/meta';
   import { createLive } from '$lib/state/live.svelte';
   import type { LinePayload } from '$lib/types';
@@ -92,8 +92,8 @@
           <dd>{headway(line.expected)}</dd>
         </div>
         <div>
-          <dt>Ratio</dt>
-          <dd>{ratio(line.ratio)}</dd>
+          <dt>Excess wait</dt>
+          <dd>{excess(line.excessWait)}</dd>
         </div>
         <div>
           <dt>Trains running</dt>
@@ -180,6 +180,12 @@
 
     <section class="explain">
       <h2>Reading the {line.name} line</h2>
+      <p>
+        <strong>Excess wait</strong> is the figure TfL publishes for this: how much longer the average
+        wait runs than the timetable asks for. Long gaps count for more than short ones, because more
+        people are stood on the platform during them, so it says what the line costs you rather than how
+        the middle train did.
+      </p>
       <p>
         The map above is a time axis, not a geographic one. Distance across the page is timetabled
         running time, so two trains six minutes apart sit six minutes apart on screen, and a

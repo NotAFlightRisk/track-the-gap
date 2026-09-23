@@ -22,6 +22,11 @@ Branches are kept apart from trunks, beacuse they're different railways. A train
 towards a section if its service pattern actually runs over it. Where lines share track, you get
 the combined corridor headway and each line's own figure side by side.
 
+There's also **excess wait**, which is what TfL publishes for the same thing - how much longer the
+average wait runs than the timetable asks for. A long gap counts for more than a short one, because
+more people are stood on the platform during it. That's the number to read when a line's typical
+headway looks fine and its verdict doesn't.
+
 The map on each line page is a **time axis**, not a geographic one - distance across the page is
 timetabled running time, so two trains six minutes apart sit six minutes apart on screen.
 

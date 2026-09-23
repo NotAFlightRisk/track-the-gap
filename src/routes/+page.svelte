@@ -77,7 +77,7 @@
       <span>Line</span>
       <span>TfL status</span>
       <span>Our reading</span>
-      <span>Headway</span>
+      <span>Headway, min:sec</span>
       <span>Train spacing</span>
     </div>
     {#each lines as line (line.id)}
@@ -100,6 +100,13 @@
       is divided by the timetabled headway for that stop, that day type and that hour, pulled from
       TfL's own published timetable. A ratio near one is an even service. A ratio of two means the
       wait has doubled.
+    </p>
+    <p>
+      <strong>Excess wait</strong> is the figure TfL itself publishes, and it is the one to read when
+      a line's typical headway looks fine but its verdict does not. It is how much longer the average
+      wait runs than the timetable asks for, counting long gaps for more than short ones because more
+      people are stood on the platform during them. A minus figure means the line is running closer together
+      than its timetable.
     </p>
     <p>
       Branches are handled separately from trunks, because they are different railways. A train only

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { STATUS_META } from '$lib/config/health';
   import { lineById } from '$lib/config/lines';
-  import { clock, eta, headway, ratio } from '$lib/format';
+  import { clock, eta, excess, headway } from '$lib/format';
   import type { Meta, SegmentView } from '$lib/types';
   import StatusPill from './StatusPill.svelte';
 
@@ -40,8 +40,8 @@
         <dd>{headway(segment.headway.expected)}</dd>
       </div>
       <div>
-        <dt>Ratio</dt>
-        <dd>{ratio(segment.headway.ratio)}</dd>
+        <dt>Excess wait</dt>
+        <dd>{excess(segment.headway.excessWait)}</dd>
       </div>
       <div>
         <dt>Largest gap</dt>

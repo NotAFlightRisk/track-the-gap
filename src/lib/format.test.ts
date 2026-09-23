@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gapsBlurb, plural, stripLabel, verdictBasis } from './format';
+import { excess, gapsBlurb, plural, stripLabel, verdictBasis } from './format';
 
 const line = (over = {}) => ({
   name: 'Central',
@@ -113,5 +113,21 @@ describe('gapsBlurb', () => {
 
   it('says so plainly when there is nothing to rank', () => {
     expect(gapsBlurb(0)).toBe('No section has two predictions to measure a gap from yet.');
+  });
+});
+
+describe('excess', () => {
+  it('signs the minutes, so a line running early cannot read as a line running late', () => {
+    expect(excess(78)).toBe('+1.3 min');
+    expect(excess(-24)).toBe('−0.4 min');
+  });
+
+  it('leaves a sign off a line sitting on its timetable', () => {
+    expect(excess(0)).toBe('0.0 min');
+    expect(excess(2)).toBe('0.0 min');
+  });
+
+  it('says nothing where there is nothing to say', () => {
+    expect(excess(null)).toBe('–');
   });
 });

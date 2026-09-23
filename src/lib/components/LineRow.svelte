@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { headway, stripLabel } from '$lib/format';
+  import { excess, headway, stripLabel } from '$lib/format';
   import type { LineSummary } from '$lib/types';
   import GapStrip from './GapStrip.svelte';
   import OfficialStatus from './OfficialStatus.svelte';
@@ -23,6 +23,7 @@
 
   <div class="health">
     <StatusPill status={line.status} />
+    <p class="excess numeric">{excess(line.excessWait)} <span>excess wait</span></p>
   </div>
 
   <dl class="figures numeric">
@@ -94,6 +95,22 @@
         outline: 2px solid var(--text);
         outline-offset: 2px;
       }
+    }
+  }
+
+  .excess {
+    margin-block-start: var(--space-2);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-muted);
+
+    span {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
   }
 
