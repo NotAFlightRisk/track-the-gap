@@ -6,7 +6,7 @@ Thanks for helping keep this project and the people using it safe 💛
 
 ## Supported versions
 
-Our version history is liniar, and we use semantic versioning. Only the latest release gets patched, so check you're on it before reporting anything.
+Our version history is linear, and we use semantic versioning. Only the latest release gets patched, so check you're on it before reporting anything.
 
 ---
 
@@ -15,7 +15,7 @@ Our version history is liniar, and we use semantic versioning. Only the latest r
 > [!IMPORTANT]
 > Please don't report anything publicly (issues, PRs, discussions) without giving us at least 30 days to respond and handle it.
 
-Acceptible channels:
+Acceptable channels:
 
 1. **GitHub** (preferred) - open an [advisory](https://github.com/NotAFlightRisk/track-the-gap/security/advisories/new) from the Security tab
 2. **GitHub DM** - message [@NotAFlightRisk](https://github.com/NotAFlightRisk) if the advisory form isn't working for you
