@@ -1,9 +1,13 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import '../app.css';
   import Footer from '$lib/components/Footer.svelte';
   import Header from '$lib/components/Header.svelte';
+  import { loadPlausible } from '$lib/plausible';
 
   const { data, children } = $props();
+
+  onMount(() => loadPlausible());
 </script>
 
 <a class="skip" href="#main">Skip to the service board</a>

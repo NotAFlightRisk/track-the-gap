@@ -33,6 +33,7 @@ jobs:
       - run: npm run build
         env:
           ADAPTER: cloudflare
+          PUBLIC_PLAUSIBLE_SCRIPT: ${{ vars.PUBLIC_PLAUSIBLE_SCRIPT }}
 
       - name: Push it to Cloudflare
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
