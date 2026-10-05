@@ -6,6 +6,7 @@ RUN npm ci
 COPY . .
 ENV ADAPTER=node
 ARG PUBLIC_PLAUSIBLE_SCRIPT
+ARG PUBLIC_SENTRY_DSN
 RUN npm run build && npm prune --omit=dev
 
 FROM node:26-alpine

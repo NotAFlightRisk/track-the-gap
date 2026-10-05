@@ -52,6 +52,10 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
+      # The SDK and its build plugin, so a major bump moves them together
+      sentry:
+        patterns:
+          - '@sentry/*'
       everything-else:
         patterns:
           - '*'
