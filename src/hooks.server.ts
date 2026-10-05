@@ -1,19 +1,9 @@
-import { captureException, setAsyncLocalStorageAsyncContextStrategy } from '@sentry/cloudflare';
-import { wrapRequestHandler } from '@sentry/cloudflare/request';
-import type { Handle, HandleServerError } from '@sveltejs/kit';
-import { privacy } from '$lib/reporting';
+import type { HandleServerError } from '@sveltejs/kit';
+import { report } from '$lib/server/report';
 
-const dsn = import.meta.env.PUBLIC_SENTRY_DSN;
-// Keeps each request's reports apart when a Worker is handling several at once
-if (dsn) setAsyncLocalStorageAsyncContextStrategy();
+// Our TfL key rides along in the query string of every call we make to them
+const scrub = (text: string) => text.replace(/(app_key=)[^&#"\\\s]*/g, '$1…');
 
-export const handle: Handle = ({ event, resolve }) => {
-  const context = event.platform?.ctx;
-  if (!dsn || !context) return resolve(event);
-  const options = { dsn, ...privacy };
-  return wrapRequestHandler({ options, request: event.request, context }, () => resolve(event));
-};
-
-export const handleError: HandleServerError = ({ error, status }) => {
-  if (dsn && status >= 500) captureException(error);
+export const handleError: HandleServerError = ({ error, event, status }) => {
+  if (import.meta.env.PUBLIC_SENTRY_DSN && status >= 500) report(error, event, scrub);
 };
