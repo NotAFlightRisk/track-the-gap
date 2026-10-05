@@ -118,7 +118,6 @@ const toShelf = (data: LiveData) =>
     .catch(() => undefined);
 
 let current: LiveData | null = null;
-let inflight: Promise<LiveData> | null = null;
 let nextAttempt = 0;
 
 /** One shared snapshot per TTL, so traffic never multiplies calls to TfL. */
@@ -126,7 +125,9 @@ export async function live(): Promise<LiveData> {
   current ??= await fromShelf();
   const now = Date.now();
   if (current && (now - current.fetchedAt < TTL || now < nextAttempt)) return current;
-  inflight ??= fetchLive(current)
+  // a fetch dies with the request that made it, so nobody else gets to await it
+  nextAttempt = now + TIMEOUT;
+  return fetchLive(current)
     .then(async (data) => {
       nextAttempt = data.stale ? Date.now() + TTL * 4 : 0;
       if (!data.stale) await toShelf(data);
@@ -137,11 +138,7 @@ export async function live(): Promise<LiveData> {
       if (!current) throw err;
       current = { ...current, stale: true, error: err.message };
       return current;
-    })
-    .finally(() => {
-      inflight = null;
     });
-  return inflight;
 }
 
 export const pollSeconds = TTL / 1000;

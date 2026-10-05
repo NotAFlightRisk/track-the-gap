@@ -133,6 +133,22 @@ describe('live', () => {
     expect(half.fetchedAt).toBe(LATER.getTime());
   });
 
+  it('never waits on a refresh another request walked away from', async () => {
+    await fetching(answering);
+    const { live } = await import('./tfl');
+    const fresh = await live();
+
+    vi.setSystemTime(LATER);
+    const stuck = await fetching(() => new Promise(() => {}));
+    void live();
+    expect(await live()).toBe(fresh);
+    expect(stuck).toHaveBeenCalledTimes(2);
+
+    vi.setSystemTime(LATER.getTime() + 6_000);
+    await fetching(answering);
+    expect((await live()).fetchedAt).toBe(Date.now());
+  });
+
   it('falls back to the last reading another isolate shelved when TfL is down', async () => {
     colo();
     await fetching(answering);
