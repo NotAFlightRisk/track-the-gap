@@ -5,6 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ENV ADAPTER=node
+ARG PUBLIC_PLAUSIBLE_SCRIPT
 RUN npm run build && npm prune --omit=dev
 
 FROM node:26-alpine

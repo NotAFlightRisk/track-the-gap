@@ -85,11 +85,12 @@ Follow the [Development](#development) steps, then `ADAPTER=node npm run build` 
 
 ## Configuration
 
-| Variable           | Default | What it does                                                                                                                                          |
-| ------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TFL_APP_KEY`      | none    | Your TfL Unified API key, free from [api-portal.tfl.gov.uk](https://api-portal.tfl.gov.uk/). The API answers without one, at a much lower rate limit. |
-| `TFL_POLL_SECONDS` | `15`    | How long a live snapshot is held before refetching. Two API calls per refresh, no matter how many people are looking.                                 |
-| `ADAPTER`          | vercel  | Set to `node` for a self-hosted server build.                                                                                                         |
+| Variable                  | Default | What it does                                                                                                                                          |
+| ------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TFL_APP_KEY`             | none    | Your TfL Unified API key, free from [api-portal.tfl.gov.uk](https://api-portal.tfl.gov.uk/). The API answers without one, at a much lower rate limit. |
+| `TFL_POLL_SECONDS`        | `15`    | How long a live snapshot is held before refetching. Two API calls per refresh, no matter how many people are looking.                                 |
+| `ADAPTER`                 | vercel  | Set to `node` for a self-hosted server build.                                                                                                         |
+| `PUBLIC_PLAUSIBLE_SCRIPT` | none    | Your [Plausible](https://plausible.io/) script URL, to count visits. Read at build time, so set it before building.                                   |
 
 Thresholds, the day-type bands and the "insufficient data" cutoff all live in
 `src/lib/config/health.ts` rather than in any component, so you can retune what counts as a gap
