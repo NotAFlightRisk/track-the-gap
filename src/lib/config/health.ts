@@ -18,6 +18,8 @@ export interface HealthConfig {
     degraded: number;
     gap: number;
   };
+  /** The longest of N headways grows with N, so the gap bar rises this much per log N. */
+  gapGrowth: number;
   /** Coefficient of variation across a segment's headways, above which service is irregular. */
   irregularity: number;
   /** A gap must also be this many seconds longer than expected, to ride out prediction jitter. */
@@ -35,6 +37,7 @@ export interface HealthConfig {
 export const HEALTH: HealthConfig = {
   minSamples: 1,
   ratio: { bunching: 0.45, degraded: 1.4, gap: 2 },
+  gapGrowth: 0.3,
   irregularity: 0.8,
   minExcessSeconds: 180,
   horizonSeconds: 1800,
@@ -57,7 +60,8 @@ export function classify(
 ): HealthStatus {
   if (ratio === null || samples < config.minSamples) return 'no-data';
   const worst = worstRatio ?? ratio;
-  const gapped = worst >= config.ratio.gap && (excess ?? 0) >= config.minExcessSeconds;
+  const bar = config.ratio.gap * (1 + config.gapGrowth * Math.log(samples));
+  const gapped = worst >= bar && (excess ?? 0) >= config.minExcessSeconds;
   if (gapped && (variation ?? 0) >= config.irregularity) return 'severe';
   if (gapped) return 'gap';
   if (ratio <= config.ratio.bunching) return 'bunching';
@@ -137,7 +141,7 @@ export const STATUS_META: Record<HealthStatus, StatusMeta> = {
     label: 'Service gap',
     short: 'Gap',
     glyph: '⌇',
-    hint: 'At least one gap is double the expected headway or worse.'
+    hint: 'At least one gap is double the expected headway or worse, and longer still when more trains are in view.'
   },
   bunching: {
     label: 'Bunching',
