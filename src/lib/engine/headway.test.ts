@@ -48,12 +48,17 @@ describe('measure', () => {
     expect(headway.status).toBe('gap');
   });
 
+  it('asks more of the worst gap the more headways it was picked from', () => {
+    expect(measure(at(0, 5.5), 120).status).toBe('gap');
+    expect(measure(at(0, 2, 4, 6, 8, 10, 12, 17.5, 19.5), 120).status).toBe('normal');
+  });
+
   it('calls tightly spaced trains bunching', () => {
     expect(measure(at(0, 0.8, 1.6, 2.4), 300).status).toBe('bunching');
   });
 
   it('separates severe irregularity from a plain gap', () => {
-    expect(measure(at(0, 0.8, 9, 9.8, 18), 180).status).toBe('severe');
+    expect(measure(at(0, 0.8, 10, 10.8, 20), 180).status).toBe('severe');
   });
 
   it('sorts arrivals that come in out of order', () => {
@@ -82,7 +87,7 @@ describe('gapIn', () => {
   });
 
   it('still owns it when spacing has broken down altogether', () => {
-    expect(gapIn(measure(at(0, 0.8, 9, 9.8, 18), 180))).not.toBeNull();
+    expect(gapIn(measure(at(0, 0.8, 10, 10.8, 20), 180))).not.toBeNull();
   });
 });
 
