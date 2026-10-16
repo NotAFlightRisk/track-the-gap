@@ -1,6 +1,6 @@
-import raw from '$lib/data/network.json';
-import { packRows } from '$lib/network/rows';
-import type { DirectionModel, LineModel, NetworkModel, Segment } from '$lib/network/types';
+import raw from '#lib/data/network.json';
+import { packRows } from '#lib/network/rows.js';
+import type { DirectionModel, LineModel, NetworkModel, Segment } from '#lib/network/types.js';
 
 export const network = raw as unknown as NetworkModel;
 

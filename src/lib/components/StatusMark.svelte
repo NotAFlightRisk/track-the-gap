@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HealthStatus } from '$lib/config/health';
+  import type { HealthStatus } from '#lib/config/health.js';
 
   interface Props {
     status: HealthStatus;

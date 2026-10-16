@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { STATUS_META, type HealthStatus } from '$lib/config/health';
+  import { STATUS_META, type HealthStatus } from '#lib/config/health.js';
   import StatusMark from './StatusMark.svelte';
 
   interface Props {

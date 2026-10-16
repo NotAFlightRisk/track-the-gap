@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { LINES } from '$lib/config/lines';
+  import { LINES } from '#lib/config/lines.js';
 </script>
 
 <svelte:head>

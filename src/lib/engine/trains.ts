@@ -1,5 +1,5 @@
-import { HEALTH } from '$lib/config/health';
-import type { DirectionModel, Direction } from '$lib/network/types';
+import { HEALTH } from '#lib/config/health.js';
+import type { DirectionModel, Direction } from '#lib/network/types.js';
 
 export interface Prediction {
   vehicleId: string;

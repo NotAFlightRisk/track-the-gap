@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { OfficialStatus } from '$lib/types';
+  import type { OfficialStatus } from '#lib/types.js';
 
   const { status, detail = false }: { status: OfficialStatus; detail?: boolean } = $props();
 

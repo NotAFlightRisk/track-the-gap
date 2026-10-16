@@ -1,5 +1,5 @@
-import { error, json } from '@sveltejs/kit';
-import { lineView } from '$lib/server/snapshot';
+import { error } from '@sveltejs/kit';
+import { lineView } from '#lib/server/snapshot.js';
 
 export const GET = async ({ params, setHeaders }) => {
   const payload = await lineView(params.line).catch(() =>
@@ -9,5 +9,5 @@ export const GET = async ({ params, setHeaders }) => {
   setHeaders({
     'cache-control': `public, max-age=0, s-maxage=${Math.round(payload.meta.pollSeconds)}`
   });
-  return json(payload);
+  return Response.json(payload);
 };

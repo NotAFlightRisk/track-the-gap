@@ -30,7 +30,7 @@ const chain = (error: unknown): Exception[] => {
 /** Sends one error straight to Bugsink, as the Sentry SDK would nearly double the Worker */
 export function report(
   error: unknown,
-  { url, request, platform }: RequestEvent,
+  { url, request }: RequestEvent,
   scrub: (text: string) => string
 ) {
   const { origin, pathname, username } = new URL(import.meta.env.PUBLIC_SENTRY_DSN);
@@ -46,9 +46,9 @@ export function report(
     },
     exception: { values: chain(error) }
   };
-  const sent = fetch(`${origin}/api${pathname}/store/?sentry_key=${username}&sentry_version=7`, {
+  return fetch(`${origin}/api${pathname}/store/?sentry_key=${username}&sentry_version=7`, {
     method: 'POST',
-    body: scrub(JSON.stringify(event))
+    body: scrub(JSON.stringify(event)),
+    signal: AbortSignal.timeout(3_000)
   }).catch(() => {});
-  platform?.ctx.waitUntil(sent);
 }

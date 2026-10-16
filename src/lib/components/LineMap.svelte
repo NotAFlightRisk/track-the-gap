@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { STATUS_META } from '$lib/config/health';
-  import { eta, headway } from '$lib/format';
-  import type { DirectionView, SegmentView } from '$lib/types';
+  import { STATUS_META } from '#lib/config/health.js';
+  import { eta, headway } from '#lib/format.js';
+  import type { DirectionView, SegmentView } from '#lib/types.js';
 
   interface Props {
     direction: DirectionView;

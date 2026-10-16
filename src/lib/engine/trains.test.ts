@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { DirectionModel } from '$lib/network/types';
+import type { DirectionModel } from '#lib/network/types.js';
 import { buildTrains, type Prediction } from './trains';
 
 const NAMES: Record<string, string> = { A: 'Alpha', B: 'Bravo', C: 'Charlie', X: 'X-ray' };

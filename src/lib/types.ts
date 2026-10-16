@@ -1,6 +1,6 @@
-import type { HealthStatus } from '$lib/config/health';
-import type { Headway } from '$lib/engine/headway';
-import type { Direction } from '$lib/network/types';
+import type { HealthStatus } from '#lib/config/health.js';
+import type { Headway } from '#lib/engine/headway.js';
+import type { Direction } from '#lib/network/types.js';
 
 export type { Headway, HealthStatus, Direction };
 

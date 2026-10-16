@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { STATUS_META } from '$lib/config/health';
-  import { lineById } from '$lib/config/lines';
-  import { clock, eta, excess, headway } from '$lib/format';
-  import type { Meta, SegmentView } from '$lib/types';
+  import { STATUS_META } from '#lib/config/health.js';
+  import { lineById } from '#lib/config/lines.js';
+  import { clock, eta, excess, headway } from '#lib/format.js';
+  import type { Meta, SegmentView } from '#lib/types.js';
   import StatusPill from './StatusPill.svelte';
 
   interface Props {

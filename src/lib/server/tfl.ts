@@ -1,8 +1,8 @@
-import { env } from '$env/dynamic/private';
-import { LINE_IDS } from '$lib/config/lines';
+import { TFL_POLL_SECONDS, TFL_APP_KEY } from '$app/env/private';
+import { LINE_IDS } from '#lib/config/lines.js';
 
 const BASE = 'https://api.tfl.gov.uk';
-const TTL = Math.max(5, Number(env.TFL_POLL_SECONDS ?? 15)) * 1000;
+const TTL = Math.max(5, Number(TFL_POLL_SECONDS ?? 15)) * 1000;
 const TIMEOUT = 6_000;
 // isolates barely outlive a visit, so the colo cache holds a reading for the next one
 const SHELF = 'https://track-the-gap.internal/live';
@@ -39,7 +39,7 @@ export interface LiveData {
 
 async function get<T>(path: string): Promise<T> {
   const url = new URL(BASE + path);
-  if (env.TFL_APP_KEY) url.searchParams.set('app_key', env.TFL_APP_KEY);
+  if (TFL_APP_KEY) url.searchParams.set('app_key', TFL_APP_KEY);
   const res = await fetch(url, {
     headers: { accept: 'application/json' },
     signal: AbortSignal.timeout(TIMEOUT)
