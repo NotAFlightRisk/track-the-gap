@@ -5,8 +5,8 @@ import {
   isMeasurable,
   type HealthConfig,
   type HealthStatus
-} from '$lib/config/health';
-import type { DayType, DirectionModel, Segment } from '$lib/network/types';
+} from '#lib/config/health.js';
+import type { DayType, DirectionModel, Segment } from '#lib/network/types.js';
 import type { Train } from './trains';
 
 export interface Headway {

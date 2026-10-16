@@ -5,8 +5,8 @@ import {
   HEALTH,
   quantileStatus,
   type HealthStatus
-} from '$lib/config/health';
-import type { DirectionModel, Segment } from '$lib/network/types';
+} from '#lib/config/health.js';
+import type { DirectionModel, Segment } from '#lib/network/types.js';
 import {
   arrivalsOn,
   expectedAt,

@@ -1,4 +1,4 @@
-import { LINES } from '$lib/config/lines';
+import { LINES } from '#lib/config/lines.js';
 
 export const prerender = false;
 

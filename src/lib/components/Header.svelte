@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { LINES } from '$lib/config/lines';
+  import { LINES } from '#lib/config/lines.js';
   import Roundel from './Roundel.svelte';
   import ThemeToggle from './ThemeToggle.svelte';
 </script>

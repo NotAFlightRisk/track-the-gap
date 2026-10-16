@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ago, clock } from '$lib/format';
-  import type { Meta } from '$lib/types';
+  import { ago, clock } from '#lib/format.js';
+  import type { Meta } from '#lib/types.js';
 
   const { meta }: { meta: Meta } = $props();
 

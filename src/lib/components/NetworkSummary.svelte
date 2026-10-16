@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { HEALTH_STATUSES, STATUS_META } from '$lib/config/health';
-  import type { Meta, StatusCounts } from '$lib/types';
+  import { HEALTH_STATUSES, STATUS_META } from '#lib/config/health.js';
+  import type { Meta, StatusCounts } from '#lib/types.js';
   import Freshness from './Freshness.svelte';
   import StatusMark from './StatusMark.svelte';
 

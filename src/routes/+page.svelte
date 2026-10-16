@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { byUnhappiness } from '$lib/config/health';
-  import Legend from '$lib/components/Legend.svelte';
-  import LineRow from '$lib/components/LineRow.svelte';
-  import NetworkSummary from '$lib/components/NetworkSummary.svelte';
-  import { HOME_DESCRIPTION, homeTitle, jsonLd, SITE, TAGLINE } from '$lib/meta';
-  import { createLive } from '$lib/state/live.svelte';
-  import type { NetworkView } from '$lib/types';
+  import { byUnhappiness } from '#lib/config/health.js';
+  import Legend from '#lib/components/Legend.svelte';
+  import LineRow from '#lib/components/LineRow.svelte';
+  import NetworkSummary from '#lib/components/NetworkSummary.svelte';
+  import { HOME_DESCRIPTION, homeTitle, jsonLd, SITE, TAGLINE } from '#lib/meta.js';
+  import { createLive } from '#lib/state/live.svelte.js';
+  import type { NetworkView } from '#lib/types.js';
 
   const { data } = $props();
 

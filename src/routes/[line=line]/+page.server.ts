@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { lineView } from '$lib/server/snapshot';
+import { lineView } from '#lib/server/snapshot.js';
 
 export const load = async ({ params }) => {
   let payload;

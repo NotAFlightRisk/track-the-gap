@@ -1,5 +1,5 @@
-import { byUnhappiness, quantileStatus, type HealthStatus } from '$lib/config/health';
-import { LINES, lineById } from '$lib/config/lines';
+import { byUnhappiness, quantileStatus, type HealthStatus } from '#lib/config/health.js';
+import { LINES, lineById } from '#lib/config/lines.js';
 import {
   arrivalsOn,
   expectedAt,
@@ -8,9 +8,9 @@ import {
   measure,
   rollupHeadway,
   worstGapOf
-} from '$lib/engine/headway';
-import { buildTrains, type Train } from '$lib/engine/trains';
-import type { DirectionModel, Segment } from '$lib/network/types';
+} from '#lib/engine/headway.js';
+import { buildTrains, type Train } from '#lib/engine/trains.js';
+import type { DirectionModel, Segment } from '#lib/network/types.js';
 import type {
   DirectionView,
   Gap,
@@ -21,7 +21,7 @@ import type {
   SegmentView,
   StationView,
   StatusCounts
-} from '$lib/types';
+} from '#lib/types.js';
 import { allLines, corridors, network, stationName } from './network';
 import { live, pollSeconds, type LiveData } from './tfl';
 

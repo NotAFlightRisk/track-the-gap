@@ -1,5 +1,5 @@
-import { error, json } from '@sveltejs/kit';
-import { networkView } from '$lib/server/snapshot';
+import { error } from '@sveltejs/kit';
+import { networkView } from '#lib/server/snapshot.js';
 
 export const GET = async ({ setHeaders }) => {
   const view = await networkView().catch(() =>
@@ -8,5 +8,5 @@ export const GET = async ({ setHeaders }) => {
   setHeaders({
     'cache-control': `public, max-age=0, s-maxage=${Math.round(view.meta.pollSeconds)}`
   });
-  return json(view);
+  return Response.json(view);
 };

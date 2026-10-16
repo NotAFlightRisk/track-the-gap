@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { networkView } from '$lib/server/snapshot';
+import { networkView } from '#lib/server/snapshot.js';
 
 export const load = async () => {
   try {

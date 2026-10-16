@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { HEALTH_STATUSES, STATUS_META } from '$lib/config/health';
+  import { HEALTH_STATUSES, STATUS_META } from '#lib/config/health.js';
   import StatusMark from './StatusMark.svelte';
 </script>
 

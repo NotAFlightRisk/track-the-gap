@@ -1,15 +1,15 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import Freshness from '$lib/components/Freshness.svelte';
-  import Legend from '$lib/components/Legend.svelte';
-  import LineMap from '$lib/components/LineMap.svelte';
-  import OfficialStatus from '$lib/components/OfficialStatus.svelte';
-  import SegmentPanel from '$lib/components/SegmentPanel.svelte';
-  import StatusPill from '$lib/components/StatusPill.svelte';
-  import { excess, gapsBlurb, headway, plural, verdictBasis } from '$lib/format';
-  import { jsonLd, lineDescription, lineTitle, SITE } from '$lib/meta';
-  import { createLive } from '$lib/state/live.svelte';
-  import type { LinePayload } from '$lib/types';
+  import Freshness from '#lib/components/Freshness.svelte';
+  import Legend from '#lib/components/Legend.svelte';
+  import LineMap from '#lib/components/LineMap.svelte';
+  import OfficialStatus from '#lib/components/OfficialStatus.svelte';
+  import SegmentPanel from '#lib/components/SegmentPanel.svelte';
+  import StatusPill from '#lib/components/StatusPill.svelte';
+  import { excess, gapsBlurb, headway, plural, verdictBasis } from '#lib/format.js';
+  import { jsonLd, lineDescription, lineTitle, SITE } from '#lib/meta.js';
+  import { createLive } from '#lib/state/live.svelte.js';
+  import type { LinePayload } from '#lib/types.js';
 
   const { data } = $props();
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { excess, headway, stripLabel } from '$lib/format';
-  import type { LineSummary } from '$lib/types';
+  import { excess, headway, stripLabel } from '#lib/format.js';
+  import type { LineSummary } from '#lib/types.js';
   import GapStrip from './GapStrip.svelte';
   import OfficialStatus from './OfficialStatus.svelte';
   import StatusPill from './StatusPill.svelte';
