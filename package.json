@@ -32,7 +32,7 @@
     "svelte-check": "^4.7.5",
     "typescript": "^6.0.3",
     "vite": "^8.3.4",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
   "description": "Live London Underground headways, service gaps and train bunching",
   "license": "MIT",
