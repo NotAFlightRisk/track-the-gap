@@ -126,14 +126,25 @@ describe('live', () => {
           { statusSeverity: 11, statusSeverityDescription: 'Part Closed' }
         ]
       },
+      {
+        id: 'district',
+        lineStatuses: [
+          { statusSeverity: 16, statusSeverityDescription: 'Not Running' },
+          { statusSeverity: 6, statusSeverityDescription: 'Severe Delays' }
+        ]
+      },
       { id: 'circle', lineStatuses: [] }
     ];
     await fetching((url) => Promise.resolve(ok(arrivals(url) ? [prediction] : mixed)));
     const { live } = await import('./tfl');
     const { statuses } = await live();
 
-    expect(statuses.map(({ description }) => description)).toEqual(['Part Closed', 'Unknown']);
-    expect(statuses[1].severity).toBeNull();
+    expect(statuses.map(({ description }) => description)).toEqual([
+      'Part Closed',
+      'Not Running',
+      'Unknown'
+    ]);
+    expect(statuses[2].severity).toBeNull();
   });
 
   it('still reports line status it had to reuse as stale', async () => {
