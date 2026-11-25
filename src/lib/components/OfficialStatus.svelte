@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { OfficialStatus } from '#lib/types.js';
+  import { toneOf } from '#lib/config/severity.js';
 
   const { status, detail = false }: { status: OfficialStatus; detail?: boolean } = $props();
 
-  // TfL grades severity 0-20, worst first. Ten is a good service.
-  const tone = $derived(status.severity >= 10 ? 'good' : status.severity >= 6 ? 'minor' : 'major');
+  const tone = $derived(toneOf(status.severity));
 </script>
 
 <div class="official">
@@ -40,6 +40,11 @@
     &[data-tone='major'] {
       background: color-mix(in oklab, var(--gap) 14%, var(--surface));
       color: color-mix(in oklab, var(--gap) 55%, var(--text));
+    }
+
+    &[data-tone='unknown'] {
+      background: color-mix(in oklab, var(--no-data) 14%, var(--surface));
+      color: var(--text-muted);
     }
   }
 

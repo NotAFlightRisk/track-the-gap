@@ -5,7 +5,7 @@ import type { Direction } from '#lib/network/types.js';
 export type { Headway, HealthStatus, Direction };
 
 export interface OfficialStatus {
-  severity: number;
+  severity: number | null;
   description: string;
   reason: string | null;
 }
