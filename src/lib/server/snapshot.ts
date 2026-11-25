@@ -217,7 +217,7 @@ function buildLine(
     directions,
     official: official
       ? { severity: official.severity, description: official.description, reason: official.reason }
-      : { severity: 10, description: 'Unknown', reason: null },
+      : { severity: null, description: 'Unknown', reason: null },
     status: quantileStatus(sections),
     observed,
     expected,

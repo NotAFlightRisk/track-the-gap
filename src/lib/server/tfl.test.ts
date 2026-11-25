@@ -117,6 +117,25 @@ describe('live', () => {
     expect(malformed.error).toContain('line status');
   });
 
+  it('shows the worst of a line status rather than the lowest code', async () => {
+    const mixed = [
+      {
+        id: 'victoria',
+        lineStatuses: [
+          { statusSeverity: 10, statusSeverityDescription: 'Good Service' },
+          { statusSeverity: 11, statusSeverityDescription: 'Part Closed' }
+        ]
+      },
+      { id: 'circle', lineStatuses: [] }
+    ];
+    await fetching((url) => Promise.resolve(ok(arrivals(url) ? [prediction] : mixed)));
+    const { live } = await import('./tfl');
+    const { statuses } = await live();
+
+    expect(statuses.map(({ description }) => description)).toEqual(['Part Closed', 'Unknown']);
+    expect(statuses[1].severity).toBeNull();
+  });
+
   it('still reports line status it had to reuse as stale', async () => {
     await fetching(answering);
     const { live } = await import('./tfl');

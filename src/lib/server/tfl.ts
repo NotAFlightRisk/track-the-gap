@@ -1,5 +1,6 @@
 import { TFL_POLL_SECONDS, TFL_APP_KEY } from '$app/env/private';
 import { LINE_IDS } from '#lib/config/lines.js';
+import { worstFirst } from '#lib/config/severity.js';
 
 const BASE = 'https://api.tfl.gov.uk';
 const TTL = Math.max(5, Number(TFL_POLL_SECONDS ?? 15)) * 1000;
@@ -24,7 +25,7 @@ export interface Prediction {
 
 export interface LineStatus {
   id: string;
-  severity: number;
+  severity: number | null;
   description: string;
   reason: string | null;
 }
@@ -59,12 +60,12 @@ interface RawStatus {
 
 const readStatuses = (raw: unknown): LineStatus[] =>
   (Array.isArray(raw) ? (raw as RawStatus[]) : []).map((line) => {
-    const worst = [...(line.lineStatuses ?? [])].sort(
-      (a, b) => a.statusSeverity - b.statusSeverity
+    const worst = [...(line.lineStatuses ?? [])].sort((a, b) =>
+      worstFirst(a.statusSeverity, b.statusSeverity)
     )[0];
     return {
       id: line.id,
-      severity: worst?.statusSeverity ?? 10,
+      severity: worst?.statusSeverity ?? null,
       description: worst?.statusSeverityDescription ?? 'Unknown',
       reason: worst?.reason?.trim() || null
     };
