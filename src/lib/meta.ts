@@ -42,7 +42,7 @@ export const jsonLd = (origin: string, crumbs: Crumb[]) =>
     ]
   });
 
-/** Our other live data apps, linked from the footer with their logos in static/apps */
+/** Our other live data apps, linked from the footer */
 export const RELATED_APPS = [
   { slug: 'tubespotting', name: 'Tube Spotting', url: 'https://tubespotting.peng.ly' },
   { slug: 'leaves-on-the-line', name: 'Leaves on the Line', url: 'https://leaves.peng.ly' },
