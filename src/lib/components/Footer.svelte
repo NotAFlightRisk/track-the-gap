@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { RELATED_APPS } from '#lib/meta.js';
+
   const { generated }: { generated: string } = $props();
 
   const built = $derived(
@@ -17,6 +19,19 @@
       Network model built {built} ·
       <a href="https://github.com/NotAFlightRisk/track-the-gap">Source on GitHub</a>
     </p>
+    <div class="more">
+      <span id="more-apps">More from us:</span>
+      <ul aria-labelledby="more-apps">
+        {#each RELATED_APPS as app (app.slug)}
+          <li>
+            <a href={app.url}>
+              <img src="/apps/{app.slug}.svg" alt="" width="16" height="16" loading="lazy" />
+              {app.name}
+            </a>
+          </li>
+        {/each}
+      </ul>
+    </div>
   </div>
 </footer>
 
@@ -36,5 +51,29 @@
 
   .meta {
     margin: 0;
+  }
+
+  .more,
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .more {
+    margin-block-start: var(--space-4);
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
   }
 </style>
