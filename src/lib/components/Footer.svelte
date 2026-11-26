@@ -25,7 +25,13 @@
         {#each RELATED_APPS as app (app.slug)}
           <li>
             <a href={app.url}>
-              <img src="/apps/{app.slug}.svg" alt="" width="16" height="16" loading="lazy" />
+              <img
+                src="https://portfolio.peng.ly/logos/{app.slug}.svg"
+                alt=""
+                width="16"
+                height="16"
+                loading="lazy"
+              />
               {app.name}
             </a>
           </li>
