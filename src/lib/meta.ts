@@ -41,3 +41,11 @@ export const jsonLd = (origin: string, crumbs: Crumb[]) =>
       }
     ]
   });
+
+/** Our other live data apps, linked from the footer with their logos in static/apps */
+export const RELATED_APPS = [
+  { slug: 'tubespotting', name: 'Tube Spotting', url: 'https://tubespotting.peng.ly' },
+  { slug: 'leaves-on-the-line', name: 'Leaves on the Line', url: 'https://leaves.peng.ly' },
+  { slug: 'floodpulse', name: 'floodpulse', url: 'https://floodpulse.peng.ly' },
+  { slug: 'carbonara', name: 'carbonara', url: 'https://carbonara.peng.ly' }
+];
