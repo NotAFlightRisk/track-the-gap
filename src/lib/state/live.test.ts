@@ -3,10 +3,12 @@ import { createLive } from './live.svelte';
 
 const source = { url: '/api/network', initial: { n: 0 }, seconds: 15 };
 
-/** Runs one poll and hands back the state plus the fetch it called. */
-async function poll() {
+const answering = async () => ({ ok: true, json: async () => ({ n: 1 }) });
+
+/** Runs a few polls and hands back the state plus the fetch it called. */
+async function poll(answer: () => Promise<unknown> = answering, times = 1) {
   const listeners: (() => Promise<void>)[] = [];
-  const fetching = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ n: 1 }) });
+  const fetching = vi.fn(answer);
 
   vi.stubGlobal('fetch', fetching);
   vi.stubGlobal('document', {
@@ -17,7 +19,7 @@ async function poll() {
 
   const live = createLive(() => source);
   const stop = live.start();
-  await listeners[0]();
+  for (let tick = 0; tick < times; tick++) await listeners[0]();
   stop();
 
   return { live, fetching };
@@ -37,5 +39,16 @@ describe('createLive', () => {
   it('holds what the poll returned', async () => {
     const { live } = await poll();
     expect(live.data).toEqual({ n: 1 });
+  });
+
+  it('goes offline when two polls in a row cannot reach the server', async () => {
+    const { live } = await poll(() => Promise.reject(new TypeError('Failed to fetch')), 2);
+    expect(live.offline).toBe(true);
+  });
+
+  it('stays online while the server answers, even with an error', async () => {
+    const { live } = await poll(async () => ({ ok: false, status: 503 }), 2);
+    expect(live.offline).toBe(false);
+    expect(live.data).toEqual(source.initial);
   });
 });

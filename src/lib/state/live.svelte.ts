@@ -30,9 +30,8 @@ export function createLive<T>(source: () => Source<T>) {
         if (document.hidden) return;
         try {
           const res = await fetch(url, { cache: 'no-cache', signal: controller.signal });
-          if (!res.ok) throw new Error(String(res.status));
-          held = { url, value: (await res.json()) as T };
           failures = 0;
+          if (res.ok) held = { url, value: (await res.json()) as T };
         } catch {
           if (!controller.signal.aborted) failures += 1;
         }

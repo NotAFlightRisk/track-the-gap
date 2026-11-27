@@ -8,9 +8,10 @@
     counts: StatusCounts;
     trains: number;
     meta: Meta;
+    offline: boolean;
   }
 
-  const { counts, trains, meta }: Props = $props();
+  const { counts, trains, meta, offline }: Props = $props();
   const judged = $derived(HEALTH_STATUSES.filter((status) => status !== 'no-data'));
   const total = $derived(judged.reduce((sum, status) => sum + counts[status], 0));
 </script>
@@ -31,7 +32,7 @@
     {/each}
   </ul>
 
-  <Freshness {meta} />
+  <Freshness {meta} {offline} />
 </section>
 
 <style>

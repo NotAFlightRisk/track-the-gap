@@ -101,7 +101,7 @@
         </div>
       </dl>
 
-      <Freshness {meta} />
+      <Freshness {meta} offline={live.offline} />
     </section>
 
     {#each line.directions as direction (direction.direction)}

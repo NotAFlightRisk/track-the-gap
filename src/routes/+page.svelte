@@ -53,7 +53,12 @@
     </p>
   </header>
 
-  <NetworkSummary counts={view.counts} trains={view.trains} meta={view.meta} />
+  <NetworkSummary
+    counts={view.counts}
+    trains={view.trains}
+    meta={view.meta}
+    offline={live.offline}
+  />
 
   <div class="controls">
     <h2 id="board">The board</h2>
