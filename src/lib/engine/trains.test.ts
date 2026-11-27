@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { DirectionModel } from '#lib/network/types.js';
 import { buildTrains, type Prediction } from './trains';
 
@@ -33,7 +33,7 @@ const call = (over: Partial<Prediction>): Prediction => ({
   platformName: 'Northbound - Platform 1',
   direction: 'inbound',
   towards: 'Charlie',
-  expectedArrival: new Date(Date.now() + 60_000).toISOString(),
+  expectedArrival: new Date(Date.now() + (over.timeToStation ?? 60) * 1000).toISOString(),
   timeToStation: 60,
   currentLocation: 'Between Alpha and Bravo',
   ...over
@@ -100,6 +100,18 @@ describe('buildTrains', () => {
     const [train] = buildTrains([call({ naptanId: 'C', timeToStation: 60 })], models, {
       stationName
     });
+    expect(train.x).toBeCloseTo(4 - 1);
+  });
+
+  it('counts the eta from now rather than from when TfL made the prediction', () => {
+    vi.useFakeTimers({ now: new Date('2026-11-25T18:57:00Z') });
+    const [train] = buildTrains(
+      [call({ naptanId: 'C', timeToStation: 150, expectedArrival: '2026-11-25T18:58:00Z' })],
+      models,
+      { stationName }
+    );
+    vi.useRealTimers();
+    expect(train.eta).toBe(60);
     expect(train.x).toBeCloseTo(4 - 1);
   });
 
