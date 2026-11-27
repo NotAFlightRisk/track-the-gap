@@ -2,7 +2,7 @@
   import { ago, clock } from '#lib/format.js';
   import type { Meta } from '#lib/types.js';
 
-  const { meta }: { meta: Meta } = $props();
+  const { meta, offline }: { meta: Meta; offline: boolean } = $props();
 
   let now = $state(Date.now());
 
@@ -12,19 +12,27 @@
   });
 
   const age = $derived(now - meta.fetchedAt);
-  const late = $derived(meta.stale || age > meta.pollSeconds * 4000);
+  const late = $derived(offline || meta.stale || age > meta.pollSeconds * 4000);
 </script>
 
 <p class="freshness" class:late>
   <span class="dot" aria-hidden="true"></span>
-  {#if late}
-    Data is {ago(age)} and TfL is not answering
+  {#if offline}
+    Data is from {clock(meta.fetchedAt)}, check your connection
+  {:else if late}
+    Data is from {clock(meta.fetchedAt)} and TfL is not answering
   {:else}
     Updated {ago(age)}, {clock(meta.fetchedAt)}
   {/if}
 </p>
 <span class="visually-hidden" role="status">
-  {late ? 'Live updates have stalled.' : 'Live updates are running.'}
+  {#if offline}
+    Can't reach the live feed, check your connection.
+  {:else if late}
+    Live updates have stalled.
+  {:else}
+    Live updates are running.
+  {/if}
 </span>
 
 <style>

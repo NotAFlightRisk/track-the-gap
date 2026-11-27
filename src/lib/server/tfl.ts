@@ -93,7 +93,7 @@ async function fetchLive(previous: LiveData | null): Promise<LiveData> {
     fetchedAt: read.at,
     predictions: read.predictions,
     statuses,
-    stale: failed.length > 0,
+    stale: !arrived,
     error: failed.length ? `TfL ${failed.join(' and ')} unavailable` : null
   };
 }

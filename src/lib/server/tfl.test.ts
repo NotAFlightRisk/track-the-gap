@@ -113,7 +113,7 @@ describe('live', () => {
     const malformed = await live();
 
     expect(malformed.statuses).toEqual(fresh.statuses);
-    expect(malformed.stale).toBe(true);
+    expect(malformed.stale).toBe(false);
     expect(malformed.error).toContain('line status');
   });
 
@@ -147,7 +147,7 @@ describe('live', () => {
     expect(statuses[2].severity).toBeNull();
   });
 
-  it('still reports line status it had to reuse as stale', async () => {
+  it('keeps fresh arrivals fresh when only line status fails', async () => {
     await fetching(answering);
     const { live } = await import('./tfl');
     await live();
@@ -158,7 +158,7 @@ describe('live', () => {
     );
     const half = await live();
 
-    expect(half.stale).toBe(true);
+    expect(half.stale).toBe(false);
     expect(half.error).toContain('line status');
     expect(half.fetchedAt).toBe(LATER.getTime());
   });
@@ -192,6 +192,22 @@ describe('live', () => {
     expect(cold.predictions).toEqual(fresh.predictions);
     expect(cold.fetchedAt).toBe(fresh.fetchedAt);
     expect(cold.stale).toBe(true);
+  });
+
+  it('shelves a reading that only lost line status', async () => {
+    colo();
+    await fetching((url) =>
+      arrivals(url) ? Promise.resolve(ok([prediction])) : Promise.reject(new Error('TfL 500'))
+    );
+    const half = await (await import('./tfl')).live();
+
+    vi.resetModules();
+    vi.setSystemTime(LATER);
+    await fetching(tflDown);
+    const cold = await (await import('./tfl')).live();
+
+    expect(cold.predictions).toEqual(half.predictions);
+    expect(cold.fetchedAt).toBe(half.fetchedAt);
   });
 
   it('still throws on a cold isolate with nothing shelved', async () => {
