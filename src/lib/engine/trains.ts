@@ -102,13 +102,15 @@ const originFromLocation = (
 };
 
 function toCalls(ordered: Prediction[], horizonSeconds: number): Call[] {
+  const now = Date.now();
   const seen = new Set<string>();
   const calls: Call[] = [];
   for (const p of ordered) {
     const at = Date.parse(p.expectedArrival);
     if (seen.has(p.naptanId) || p.timeToStation > horizonSeconds || !Number.isFinite(at)) continue;
     seen.add(p.naptanId);
-    calls.push({ stop: p.naptanId, eta: p.timeToStation, at });
+    // timeToStation counts from when TfL made the prediction, often a minute or more ago
+    calls.push({ stop: p.naptanId, eta: Math.max(0, Math.round((at - now) / 1000)), at });
   }
   return calls;
 }
